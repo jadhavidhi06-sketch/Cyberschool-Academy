@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberSchool Academy — Elite Cybersecurity Training</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--black:#0a0a0a;--green:#00ff41;--blue:#00d4ff;--purple:#7b2fff;
+--red:#ff3366;--orange:#ff6b2b;--gold:#ffd700;
+--surface1:#0f0f0f;--surface2:#141414;--surface3:#1a1a1a;--surface4:#1f1f1f;
+--border:#ffffff0d;--border2:#ffffff1a;--text1:#f0f0f0;--text2:#a0a0a0;--text3:#606060;
+--font-mono:'JetBrains Mono',monospace;--font-head:'Montserrat',sans-serif;
+--glow-green:0 0 20px #00ff4133,0 0 60px #00ff4111;
+--glow-blue:0 0 20px #00d4ff33,0 0 60px #00d4ff11;
+--transition:all .3s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--text1);font-family:var(--font-head);overflow-x:hidden;cursor:none}
+.cursor{position:fixed;width:12px;height:12px;background:var(--green);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);mix-blend-mode:screen}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid var(--green);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:all .12s ease;opacity:.5}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0a0a0a}::-webkit-scrollbar-thumb{background:var(--green);border-radius:2px}
+::selection{background:var(--green);color:#000}
+
+/* CINEMATIC INTRO */
+#cinematic-intro{position:fixed;inset:0;z-index:10000;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column}
+#intro-canvas{position:absolute;inset:0;width:100%;height:100%}
+.vault-container{position:relative;z-index:2;text-align:center}
+.vault-door{width:200px;height:200px;margin:0 auto 2rem;position:relative}
+.vault-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--green);animation:vaultSpin 2s linear infinite;opacity:0;transition:opacity .5s}
+.vault-ring:nth-child(2){border-color:var(--blue);animation-duration:3s;animation-direction:reverse;width:80%;height:80%;top:10%;left:10%}
+.vault-ring:nth-child(3){border-style:dashed;width:60%;height:60%;top:20%;left:20%;animation-duration:1.5s}
+.vault-inner{position:absolute;inset:20px;background:radial-gradient(circle,#0a2a0a,#000);border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--green)}
+.vault-lock{font-family:var(--font-mono);color:var(--green);font-size:2.5rem;text-shadow:var(--glow-green)}
+.intro-logo{font-family:var(--font-head);font-weight:900;font-size:2.5rem;color:var(--green);letter-spacing:4px;opacity:0;text-transform:uppercase}
+.intro-sub{font-family:var(--font-mono);color:var(--text2);font-size:.75rem;letter-spacing:6px;opacity:0;margin-top:.5rem}
+.intro-bar{width:300px;height:2px;background:var(--surface3);margin:2rem auto 0;border-radius:1px;overflow:hidden}
+.intro-progress{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));width:0%;transition:width .15s linear}
+.intro-status{font-family:var(--font-mono);color:var(--green);font-size:.7rem;margin-top:.8rem;letter-spacing:2px;min-height:1rem}
+.skip-btn{position:absolute;bottom:2rem;right:2rem;font-family:var(--font-mono);color:var(--text3);font-size:.75rem;background:none;border:1px solid var(--text3);padding:.4rem 1rem;cursor:none;transition:var(--transition);letter-spacing:2px}
+.skip-btn:hover{color:var(--green);border-color:var(--green)}
+@keyframes vaultSpin{to{transform:rotate(360deg)}}
+
+/* MAIN */
+#app{opacity:0;transition:opacity 1s ease}
+#app.visible{opacity:1}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:64px;background:#0a0a0aee;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 2rem;gap:1.5rem}
+.nav-logo{font-family:var(--font-head);font-weight:900;font-size:1rem;color:var(--green);letter-spacing:2px;text-transform:uppercase;cursor:none;white-space:nowrap}
+.nav-logo span{color:var(--blue)}
+.nav-links{display:flex;gap:1rem;margin:0 auto}
+.nav-link{font-family:var(--font-mono);font-size:.7rem;color:var(--text2);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:var(--transition);cursor:none;padding:.3rem 0;border-bottom:1px solid transparent}
+.nav-link:hover,.nav-link.active{color:var(--green);border-color:var(--green)}
+.nav-actions{display:flex;gap:.5rem;align-items:center}
+.nav-btn{font-family:var(--font-mono);font-size:.65rem;padding:.35rem .8rem;border:1px solid var(--border2);color:var(--text2);background:transparent;cursor:none;transition:var(--transition);letter-spacing:1px;white-space:nowrap}
+.nav-btn:hover{border-color:var(--green);color:var(--green)}
+.nav-btn.primary{border-color:var(--green);color:var(--green);background:#00ff4111}
+
+/* CLI SEARCH */
+.cli-search{position:relative;display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border2);padding:.3rem .8rem;min-width:200px;transition:var(--transition)}
+.cli-search:focus-within{border-color:var(--green);box-shadow:var(--glow-green)}
+.cli-prompt{font-family:var(--font-mono);color:var(--green);font-size:.7rem;margin-right:.5rem;white-space:nowrap}
+.cli-input{background:none;border:none;outline:none;font-family:var(--font-mono);color:var(--text1);font-size:.7rem;width:100%;caret-color:var(--green)}
+.cli-results{position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-top:none;z-index:100;max-height:280px;overflow-y:auto;display:none}
+.cli-result-item{padding:.5rem .8rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text2);cursor:none;transition:var(--transition);border-bottom:1px solid var(--border)}
+.cli-result-item:hover{background:var(--surface3);color:var(--green)}
+.cli-search.open .cli-results{display:block}
+
+/* PAGES */
+.page{display:none;min-height:100vh;padding-top:64px}
+.page.active{display:block}
+
+/* HERO */
+#hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-content{position:relative;z-index:2;text-align:center;padding:2rem}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:#00ff4111;border:1px solid var(--green);color:var(--green);font-family:var(--font-mono);font-size:.68rem;padding:.3rem 1rem;letter-spacing:2px;margin-bottom:2rem;animation:badgePulse 2s infinite}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 #00ff4133}50%{box-shadow:0 0 0 8px transparent}}
+.hero-title{font-family:var(--font-head);font-weight:900;font-size:clamp(2.2rem,6vw,4.5rem);line-height:1.05;letter-spacing:-1px;margin-bottom:1.5rem}
+.hero-title .line1{color:var(--text1);display:block}
+.hero-title .line2{color:var(--green);display:block;position:relative}
+.hero-title .line3{color:var(--blue);display:block}
+.glitch{position:relative;display:inline-block}
+.glitch::before{content:attr(data-text);position:absolute;inset:0;color:var(--red);clip-path:polygon(0 0,100% 0,100% 35%,0 35%);animation:glitch1 3.5s infinite;transform:translate(-2px,0)}
+.glitch::after{content:attr(data-text);position:absolute;inset:0;color:var(--blue);clip-path:polygon(0 65%,100% 65%,100% 100%,0 100%);animation:glitch2 3.5s infinite;transform:translate(2px,0)}
+@keyframes glitch1{0%,92%,100%{transform:translate(0)}95%{transform:translate(-3px,1px)}97%{transform:translate(3px,-1px)}}
+@keyframes glitch2{0%,92%,100%{transform:translate(0)}94%{transform:translate(3px,1px)}96%{transform:translate(-3px,-1px)}}
+.hero-desc{font-family:var(--font-mono);color:var(--text2);font-size:.85rem;max-width:560px;margin:0 auto 2.5rem;line-height:1.9;letter-spacing:.3px}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{font-family:var(--font-mono);font-size:.75rem;padding:.7rem 1.75rem;border:1px solid;cursor:none;transition:var(--transition);letter-spacing:2px;text-transform:uppercase;text-decoration:none;display:inline-block}
+.btn-green{border-color:var(--green);color:var(--green);background:#00ff4108}
+.btn-green:hover{box-shadow:var(--glow-green);background:#00ff4118}
+.btn-blue{border-color:var(--blue);color:var(--blue);background:#00d4ff08}
+.btn-blue:hover{box-shadow:var(--glow-blue);background:#00d4ff18}
+.btn-outline{border-color:var(--border2);color:var(--text2)}
+.btn-outline:hover{border-color:var(--text1);color:var(--text1)}
+.hero-stats{display:flex;gap:3rem;justify-content:center;margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border)}
+.hero-stat{text-align:center}
+.hero-stat-num{font-family:var(--font-head);font-weight:900;font-size:2rem;color:var(--green);display:block}
+.hero-stat-label{font-family:var(--font-mono);color:var(--text3);font-size:.62rem;letter-spacing:3px;text-transform:uppercase;margin-top:.2rem}
+.scroll-indicator{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;animation:float 2s ease-in-out infinite}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--green),transparent)}
+.scroll-label{font-family:var(--font-mono);color:var(--text3);font-size:.6rem;letter-spacing:3px}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+
+/* SECTIONS */
+.section{padding:6rem 2rem}
+.section-alt{background:var(--surface1)}
+.container{max-width:1200px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:4rem}
+.section-tag{font-family:var(--font-mono);color:var(--green);font-size:.68rem;letter-spacing:4px;text-transform:uppercase;margin-bottom:.75rem;display:block}
+.section-title{font-family:var(--font-head);font-weight:900;font-size:clamp(1.8rem,4vw,2.8rem);color:var(--text1);line-height:1.2}
+.section-title span{color:var(--green)}
+.section-desc{font-family:var(--font-mono);color:var(--text2);font-size:.8rem;max-width:480px;margin:.8rem auto 0;line-height:1.9}
+
+/* NEURAL MAP */
+#neural-map-container{position:relative;height:480px;margin:0 auto;max-width:1000px;border:1px solid var(--border);background:#050505;overflow:hidden}
+#neural-canvas{width:100%;height:100%;cursor:none}
+.neural-overlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,var(--surface1),transparent);height:80px;pointer-events:none}
+.neural-feed{position:absolute;top:1rem;right:1rem;width:240px;background:#0a0a0acc;border:1px solid var(--border2);padding:.75rem;font-family:var(--font-mono);font-size:.63rem}
+.neural-feed-title{color:var(--green);margin-bottom:.5rem;letter-spacing:2px}
+.neural-event{color:var(--text3);padding:.2rem 0;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color 3s}
+.neural-event.new{color:var(--green)}
+.neural-coords{position:absolute;bottom:1rem;left:1rem;font-family:var(--font-mono);font-size:.6rem;color:var(--text3);letter-spacing:2px}
+
+/* COURSES */
+.dept-tabs{display:flex;gap:0;margin-bottom:3rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.dept-tab{font-family:var(--font-mono);font-size:.68rem;padding:.65rem 1.25rem;color:var(--text3);cursor:none;transition:var(--transition);letter-spacing:2px;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px}
+.dept-tab:hover{color:var(--text2)}
+.dept-tab.active{color:var(--green);border-color:var(--green)}
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem}
+.course-card{background:var(--surface2);border:1px solid var(--border);padding:1.5rem;position:relative;overflow:hidden;transition:var(--transition);cursor:none}
+.course-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 12px 40px #00000080}
+.course-card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);transition:left .5s ease}
+.course-card:hover::before{left:100%}
+.course-card::after{content:'';position:absolute;left:0;right:0;height:2px;background:linear-gradient(to bottom,transparent,rgba(0,255,65,.12),transparent);top:-100%;transition:top .7s ease;pointer-events:none}
+.course-card:hover::after{top:100%}
+.course-dept{font-family:var(--font-mono);font-size:.6rem;color:var(--blue);letter-spacing:3px;text-transform:uppercase;margin-bottom:.75rem}
+.course-title{font-family:var(--font-head);font-weight:700;font-size:1.05rem;color:var(--text1);margin-bottom:.6rem;line-height:1.3}
+.course-desc{font-family:var(--font-mono);font-size:.7rem;color:var(--text2);line-height:1.75;margin-bottom:1.25rem}
+.course-meta{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}
+.course-tag{font-family:var(--font-mono);font-size:.58rem;padding:.2rem .5rem;border:1px solid var(--border2);color:var(--text3)}
+.course-seats{display:flex;align-items:center;gap:.5rem;font-family:var(--font-mono);font-size:.65rem;margin-bottom:1rem}
+.seats-bar{flex:1;height:3px;background:var(--surface4);border-radius:1px;overflow:hidden}
+.seats-fill{height:100%;border-radius:1px}
+.seats-fill.low{background:var(--red)}
+.seats-fill.med{background:var(--orange)}
+.seats-fill.high{background:var(--green)}
+.course-footer{display:flex;align-items:center;justify-content:space-between}
+.course-price{font-family:var(--font-head);font-weight:700;font-size:1.05rem;color:var(--green)}
+.course-enroll{font-family:var(--font-mono);font-size:.65rem;padding:.35rem .9rem;border:1px solid var(--green);color:var(--green);background:transparent;cursor:none;transition:var(--transition);letter-spacing:1px}
+.course-enroll:hover{background:var(--green);color:#000}
+.pdf-badge{position:absolute;top:1rem;right:1rem;font-family:var(--font-mono);font-size:.58rem;padding:.2rem .5rem;background:#00d4ff11;border:1px solid var(--blue);color:var(--blue);letter-spacing:1px;cursor:none;transition:var(--transition)}
+.pdf-badge:hover{background:#00d4ff22}
+
+/* VERIFY */
+.verify-box{background:var(--surface2);border:1px solid var(--border);padding:2rem;position:relative}
+.verify-box::before{content:'VERIFICATION ENGINE v2.1';font-family:var(--font-mono);font-size:.58rem;color:var(--green);position:absolute;top:-10px;left:1rem;background:var(--surface1);padding:0 .5rem;letter-spacing:2px}
+.verify-tabs{display:flex;gap:0;margin-bottom:2rem}
+.verify-tab{font-family:var(--font-mono);font-size:.68rem;padding:.55rem 1.25rem;background:var(--surface2);border:1px solid var(--border);color:var(--text3);cursor:none;transition:var(--transition);letter-spacing:1px;flex:1;text-align:center}
+.verify-tab.active{background:#00ff4108;border-color:var(--green);color:var(--green)}
+.verify-input-group{display:flex;gap:1rem;margin-bottom:1.5rem}
+.verify-input{flex:1;background:var(--surface3);border:1px solid var(--border2);padding:.7rem 1rem;font-family:var(--font-mono);font-size:.82rem;color:var(--text1);outline:none;transition:var(--transition)}
+.verify-input:focus{border-color:var(--green)}
+.verify-input::placeholder{color:var(--text3)}
+.verify-btn{font-family:var(--font-mono);font-size:.72rem;padding:.7rem 1.4rem;background:#00ff4111;border:1px solid var(--green);color:var(--green);cursor:none;transition:var(--transition);letter-spacing:2px;white-space:nowrap}
+.verify-btn:hover{background:#00ff4122}
+.verify-result{display:none;border:1px solid var(--border2);padding:1.5rem;position:relative}
+.verify-result.valid{border-color:var(--green);background:#00ff4108}
+.verify-result.invalid{border-color:var(--red);background:#ff336608}
+.verify-result.show{display:block;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.verify-status{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.status-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.status-icon.valid{background:#00ff4122;border:1px solid var(--green);color:var(--green)}
+.status-icon.invalid{background:#ff336622;border:1px solid var(--red);color:var(--red)}
+.status-label{font-family:var(--font-head);font-weight:700;font-size:1.05rem}
+.status-label.valid{color:var(--green)}
+.status-label.invalid{color:var(--red)}
+.verify-details{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1rem}
+.verify-detail{background:var(--surface3);padding:.55rem .75rem}
+.verify-detail-label{font-family:var(--font-mono);font-size:.58rem;color:var(--text3);letter-spacing:2px;margin-bottom:.25rem}
+.verify-detail-value{font-family:var(--font-mono);font-size:.75rem;color:var(--text1)}
+
+/* B2B */
+.b2b-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;max-width:1000px;margin:2rem auto 0}
+.b2b-card{background:var(--surface2);border:1px solid var(--border);padding:2rem}
+.b2b-card-title{font-family:var(--font-head);font-weight:700;font-size:1.05rem;color:var(--text1);margin-bottom:.3rem}
+.b2b-card-sub{font-family:var(--font-mono);font-size:.65rem;color:var(--text3);margin-bottom:1.5rem;letter-spacing:1px}
+.form-group{margin-bottom:1rem}
+.form-label{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:2px;margin-bottom:.4rem;display:block;text-transform:uppercase}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--surface3);border:1px solid var(--border2);padding:.6rem .8rem;font-family:var(--font-mono);font-size:.78rem;color:var(--text1);outline:none;transition:var(--transition);appearance:none;-webkit-appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green)}
+.form-textarea{resize:vertical;min-height:90px}
+.form-select{cursor:none}
+.file-drop{border:1px dashed var(--border2);padding:1.25rem;text-align:center;cursor:none;transition:var(--transition)}
+.file-drop:hover,.file-drop.dragover{border-color:var(--green);background:#00ff4108}
+.file-drop-icon{font-size:1.8rem;margin-bottom:.4rem;color:var(--text3)}
+.file-drop-label{font-family:var(--font-mono);font-size:.68rem;color:var(--text3)}
+.submit-btn{width:100%;font-family:var(--font-mono);font-size:.72rem;padding:.7rem;background:#00ff4111;border:1px solid var(--green);color:var(--green);cursor:none;transition:var(--transition);letter-spacing:2px;margin-top:.25rem}
+.submit-btn:hover{background:#00ff4122;box-shadow:var(--glow-green)}
+.tracker-step{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem}
+.tracker-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tracker-dot.done{background:var(--green)}
+.tracker-dot.active{background:var(--blue);animation:badgePulse 1.5s infinite}
+.tracker-dot.pending{background:var(--surface4);border:1px solid var(--border2)}
+.tracker-label{font-family:var(--font-mono);font-size:.68rem}
+.tracker-label.done{color:var(--green)}.tracker-label.active{color:var(--blue)}.tracker-label.pending{color:var(--text3)}
+
+/* PARTNERS */
+.partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+.partner-card{background:var(--surface2);border:1px solid var(--border);padding:1.25rem;text-align:center;cursor:none;transition:var(--transition)}
+.partner-card:hover{border-color:var(--blue);background:#00d4ff08}
+.partner-logo{font-family:var(--font-head);font-weight:900;font-size:1.1rem;color:var(--blue);margin-bottom:.4rem}
+.partner-type{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:2px}
+.partner-openings{font-family:var(--font-mono);font-size:.68rem;color:var(--green);margin-top:.4rem}
+
+/* OFFLINE */
+.offline-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
+.offline-card{background:var(--surface2);border:1px solid var(--border);padding:1.5rem;position:relative}
+.offline-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--blue))}
+.offline-city{font-family:var(--font-head);font-weight:700;font-size:1.05rem;color:var(--text1);margin-bottom:.3rem}
+.offline-address{font-family:var(--font-mono);font-size:.68rem;color:var(--text3);margin-bottom:.9rem;line-height:1.65}
+.offline-badges{display:flex;gap:.4rem;flex-wrap:wrap}
+.offline-badge{font-family:var(--font-mono);font-size:.58rem;padding:.15rem .5rem;border:1px solid}
+.offline-badge.lab{border-color:var(--purple);color:var(--purple)}
+.offline-badge.cert{border-color:var(--green);color:var(--green)}
+.offline-badge.corp{border-color:var(--blue);color:var(--blue)}
+.offline-capacity{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);margin-top:.6rem}
+
+/* AUTH */
+.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden}
+.auth-card{position:relative;z-index:2;background:var(--surface1);border:1px solid var(--border2);padding:2.5rem;width:100%;max-width:440px}
+.auth-card::before{content:attr(data-title);font-family:var(--font-mono);font-size:.58rem;color:var(--green);position:absolute;top:-10px;left:1.5rem;background:var(--black);padding:0 .75rem;letter-spacing:3px}
+.auth-logo{text-align:center;margin-bottom:2rem}
+.auth-logo-text{font-family:var(--font-head);font-weight:900;font-size:1.5rem;color:var(--green);letter-spacing:3px}
+.auth-logo-sub{font-family:var(--font-mono);font-size:.6rem;color:var(--text3);letter-spacing:4px;margin-top:.3rem}
+.auth-title{font-family:var(--font-head);font-weight:700;font-size:1.3rem;margin-bottom:.3rem}
+.auth-sub{font-family:var(--font-mono);font-size:.68rem;color:var(--text3);margin-bottom:1.5rem;letter-spacing:1px}
+.auth-divider{display:flex;align-items:center;gap:1rem;margin:1.25rem 0}
+.auth-divider-line{flex:1;height:1px;background:var(--border)}
+.auth-divider-text{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:2px}
+.auth-footer{text-align:center;margin-top:1.25rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text3)}
+.auth-footer a{color:var(--green);text-decoration:none;cursor:none}
+.pass-strength{height:3px;border-radius:1px;margin-top:.4rem;background:var(--surface4);overflow:hidden}
+.pass-strength-fill{height:100%;width:0;transition:width .3s,background .3s}
+.pass-label{font-family:var(--font-mono);font-size:.58rem;color:var(--text3);margin-top:.25rem;letter-spacing:1px}
+
+/* DASHBOARD */
+.dashboard-layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;padding-top:64px}
+.sidebar{background:var(--surface1);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
+.sidebar-section{margin-bottom:1.75rem}
+.sidebar-label{font-family:var(--font-mono);font-size:.58rem;color:var(--text3);letter-spacing:3px;text-transform:uppercase;padding:0 1.25rem;margin-bottom:.65rem}
+.sidebar-item{display:flex;align-items:center;gap:.75rem;padding:.55rem 1.25rem;cursor:none;transition:var(--transition);font-family:var(--font-mono);font-size:.72rem;color:var(--text2);border-left:2px solid transparent}
+.sidebar-item:hover,.sidebar-item.active{color:var(--green);background:#00ff4108;border-color:var(--green)}
+.dashboard-main{padding:2rem;overflow-y:auto;min-height:calc(100vh - 64px)}
+.dashboard-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.dashboard-title{font-family:var(--font-head);font-weight:700;font-size:1.4rem}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:#00ff4122;border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.7rem;color:var(--green)}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.75rem}
+.stat-card{background:var(--surface2);border:1px solid var(--border);padding:1.25rem;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.stat-card.green::after{background:var(--green)}
+.stat-card.blue::after{background:var(--blue)}
+.stat-card.purple::after{background:var(--purple)}
+.stat-card.orange::after{background:var(--orange)}
+.stat-num{font-family:var(--font-head);font-weight:900;font-size:2rem;color:var(--text1)}
+.stat-label{font-family:var(--font-mono);font-size:.6rem;color:var(--text3);letter-spacing:2px;margin-top:.25rem}
+.stat-change{font-family:var(--font-mono);font-size:.62rem;color:var(--green);margin-top:.4rem}
+.progress-card,.activity-feed{background:var(--surface2);border:1px solid var(--border);padding:1.5rem}
+.progress-title{font-family:var(--font-head);font-weight:600;font-size:.95rem;margin-bottom:1rem}
+.progress-item{margin-bottom:.85rem}
+.progress-item-header{display:flex;justify-content:space-between;margin-bottom:.35rem}
+.progress-item-name{font-family:var(--font-mono);font-size:.72rem;color:var(--text2)}
+.progress-item-pct{font-family:var(--font-mono);font-size:.72rem;color:var(--green)}
+.progress-bar{height:4px;background:var(--surface4);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--blue))}
+.activity-item{display:flex;align-items:flex-start;gap:.6rem;padding:.65rem 0;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.68rem}
+.activity-dot{width:6px;height:6px;border-radius:50%;background:var(--green);margin-top:.25rem;flex-shrink:0}
+.activity-text{color:var(--text2);line-height:1.5}
+.activity-time{color:var(--text3);font-size:.62rem;margin-top:.15rem}
+.admin-badge{background:#ff336611;border:1px solid var(--red);color:var(--red);font-family:var(--font-mono);font-size:.6rem;padding:.2rem .6rem;letter-spacing:2px;display:inline-block}
+
+/* CERT PREVIEW */
+.cert-preview{border:2px solid var(--gold);padding:2rem;text-align:center;position:relative;background:linear-gradient(135deg,#0a0a0a,#1a1500);margin-top:1.25rem}
+.cert-preview::before{content:'';position:absolute;inset:8px;border:1px solid #ffd70030}
+.cert-title{font-family:var(--font-head);font-weight:900;font-size:1.4rem;color:var(--gold);letter-spacing:4px;margin-bottom:.5rem}
+.cert-body{font-family:var(--font-mono);font-size:.72rem;color:var(--text2);line-height:2.1}
+.cert-id{font-family:var(--font-mono);font-size:.62rem;color:var(--green);letter-spacing:3px;margin-top:.9rem}
+.cert-seal{font-size:1.8rem;margin-top:.4rem}
+.cert-generator{background:var(--surface2);border:1px solid var(--border);padding:1.5rem}
+
+/* MODAL & 2FA */
+.modal-overlay{position:fixed;inset:0;background:#000000cc;z-index:5000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex;animation:mfade .2s ease}
+@keyframes mfade{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--surface1);border:1px solid var(--border2);padding:2rem;width:380px;position:relative}
+.modal-box::before{content:'SECURE CHANNEL';font-family:var(--font-mono);font-size:.58rem;color:var(--green);position:absolute;top:-10px;left:1rem;background:var(--surface1);padding:0 .5rem;letter-spacing:3px}
+.otp-inputs{display:flex;gap:.4rem;margin:1.5rem 0}
+.otp-input{width:44px;height:52px;background:var(--surface3);border:1px solid var(--border2);font-family:var(--font-mono);font-size:1.4rem;color:var(--green);text-align:center;outline:none;transition:var(--transition)}
+.otp-input:focus{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+
+/* TOASTS */
+.toast-container{position:fixed;bottom:2rem;right:2rem;z-index:9000;display:flex;flex-direction:column;gap:.4rem}
+.toast{background:var(--surface1);border:1px solid var(--border2);padding:.65rem 1.1rem;font-family:var(--font-mono);font-size:.7rem;color:var(--text1);display:flex;align-items:center;gap:.6rem;animation:tIn .3s ease,tOut .3s ease 2.7s forwards;max-width:320px}
+.toast.success{border-color:var(--green)}.toast.error{border-color:var(--red)}.toast.info{border-color:var(--blue)}
+@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes tOut{to{transform:translateX(110%);opacity:0}}
+
+/* FOOTER */
+footer{background:var(--surface1);border-top:1px solid var(--border);padding:4rem 2rem 2rem}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;max-width:1200px;margin:0 auto 3rem}
+.footer-logo{font-family:var(--font-head);font-weight:900;font-size:1.1rem;color:var(--green);letter-spacing:2px;margin-bottom:.75rem}
+footer p{font-family:var(--font-mono);font-size:.7rem;color:var(--text3);line-height:1.85}
+.footer-col-title{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-bottom:.9rem}
+.footer-link{display:block;font-family:var(--font-mono);font-size:.7rem;color:var(--text2);text-decoration:none;margin-bottom:.45rem;cursor:none;transition:var(--transition)}
+.footer-link:hover{color:var(--green)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:2rem;border-top:1px solid var(--border);max-width:1200px;margin:0 auto;flex-wrap:wrap;gap:1rem}
+.footer-bottom-text{font-family:var(--font-mono);font-size:.62rem;color:var(--text3)}
+
+/* UTIL */
+.hidden{display:none!important}
+.text-green{color:var(--green)}.text-blue{color:var(--blue)}.text-red{color:var(--red)}
+.mono{font-family:var(--font-mono)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.dash-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem}
+.loading-screen{position:fixed;inset:0;background:var(--black);z-index:8000;display:flex;align-items:center;justify-content:center;transition:opacity .5s;pointer-events:none}
+.loading-screen.hidden{opacity:0}
+.loading-spinner{width:36px;height:36px;border:1px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:99990}
+
+/* UNI CARD */
+.uni-card{background:var(--surface2);border:1px solid var(--border);padding:1rem;margin-bottom:.75rem;cursor:none;transition:var(--transition)}
+.uni-card:hover{border-color:var(--purple)}
+.uni-name{font-family:var(--font-head);font-weight:700;font-size:.95rem;color:var(--text1)}
+.uni-degree{font-family:var(--font-mono);font-size:.65rem;color:var(--purple);margin-top:.25rem}
+.uni-intake{font-family:var(--font-mono);font-size:.62rem;color:var(--text3);margin-top:.35rem}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.68rem}
+.data-table th{color:var(--text3);letter-spacing:2px;padding:.6rem .75rem;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;font-size:.58rem}
+.data-table td{padding:.6rem .75rem;border-bottom:1px solid var(--border);color:var(--text2)}
+.data-table tr:hover td{background:var(--surface3);color:var(--text1)}
+.badge-role{font-family:var(--font-mono);font-size:.58rem;padding:.15rem .5rem;border:1px solid}
+.badge-role.admin{border-color:var(--red);color:var(--red)}
+.badge-role.student{border-color:var(--blue);color:var(--blue)}
+
+/* Assignment */
+.assign-card{background:var(--surface2);border:1px solid var(--border);padding:1.25rem;margin-bottom:.75rem;position:relative}
+.assign-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.assign-card.pending::before{background:var(--orange)}
+.assign-card.submitted::before{background:var(--green)}
+.assign-card.overdue::before{background:var(--red)}
+.assign-title{font-family:var(--font-head);font-weight:600;font-size:.95rem;margin-bottom:.35rem}
+.assign-meta{font-family:var(--font-mono);font-size:.62rem;color:var(--text3)}
+.assign-status{font-family:var(--font-mono);font-size:.6rem;padding:.15rem .5rem;border:1px solid;display:inline-block;margin-top:.5rem}
+.assign-status.pending{border-color:var(--orange);color:var(--orange)}
+.assign-status.submitted{border-color:var(--green);color:var(--green)}
+.assign-status.overdue{border-color:var(--red);color:var(--red)}
+
+@media(max-width:900px){
+.nav-links{display:none}
+.stats-row{grid-template-columns:1fr 1fr}
+.dashboard-layout{grid-template-columns:1fr}
+.sidebar{display:none}
+.b2b-grid{grid-template-columns:1fr}
+.footer-grid{grid-template-columns:1fr 1fr}
+.hero-stats{gap:1.5rem;flex-wrap:wrap}
+.verify-input-group{flex-direction:column}
+.dash-grid-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<div class="toast-container" id="toast-container"></div>
+<div class="loading-screen" id="loading-screen"><div style="text-align:center;font-family:var(--font-mono)"><div class="loading-spinner"></div><div style="color:var(--green);font-size:.72rem;letter-spacing:3px">INITIALIZING...</div></div></div>
+
+<!-- CINEMATIC INTRO -->
+<div id="cinematic-intro">
+  <canvas id="intro-canvas"></canvas>
+  <div class="vault-container">
+    <div class="vault-door">
+      <div class="vault-ring"></div>
+      <div class="vault-ring"></div>
+      <div class="vault-ring"></div>
+      <div class="vault-inner"><div class="vault-lock" id="vault-lock">⊗</div></div>
+    </div>
+    <div class="intro-logo" id="intro-logo">CYBERSCHOOL ACADEMY</div>
+    <div class="intro-sub" id="intro-sub">ELITE CYBERSECURITY TRAINING INSTITUTE</div>
+    <div class="intro-bar"><div class="intro-progress" id="intro-progress"></div></div>
+    <div class="intro-status" id="intro-status">&nbsp;</div>
+  </div>
+  <button class="skip-btn" onclick="skipIntro()">[ SKIP ]</button>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+<nav id="main-nav">
+  <div class="nav-logo">Cyber<span>School</span></div>
+  <div class="nav-links">
+    <a class="nav-link active" onclick="navigate('home')" data-page="home">// HOME</a>
+    <a class="nav-link" onclick="navigate('courses')" data-page="courses">// COURSES</a>
+    <a class="nav-link" onclick="navigate('verify')" data-page="verify">// VERIFY</a>
+    <a class="nav-link" onclick="navigate('partners')" data-page="partners">// PARTNERS</a>
+    <a class="nav-link" onclick="navigate('placements')" data-page="placements">// PLACEMENTS</a>
+    <a class="nav-link" onclick="navigate('offline')" data-page="offline">// CENTERS</a>
+  </div>
+  <div class="nav-actions">
+    <div class="cli-search" id="cli-search">
+      <span class="cli-prompt">$</span>
+      <input class="cli-input" id="cli-input" placeholder="/search [course]" oninput="handleSearch(this.value)" onkeydown="handleSearchKey(event)">
+      <div class="cli-results" id="cli-results"></div>
+    </div>
+    <button class="nav-btn" id="nav-login-btn" onclick="navigate('login')">LOGIN</button>
+    <button class="nav-btn primary" id="nav-register-btn" onclick="navigate('register')">ENROLL</button>
+    <button class="nav-btn hidden" id="nav-dashboard-btn" onclick="navigate('dashboard')">DASHBOARD</button>
+    <button class="nav-btn hidden" id="nav-logout-btn" onclick="logout()" style="border-color:var(--red);color:var(--red)">LOGOUT</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <section id="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block"></span>LIVE TRAINING ENVIRONMENT — INDIA</div>
+      <h1 class="hero-title">
+        <span class="line1">THE ELITE</span>
+        <span class="line2 glitch" data-text="CYBERSECURITY">CYBERSECURITY</span>
+        <span class="line3">ACADEMY</span>
+      </h1>
+      <p class="hero-desc">Master offensive &amp; defensive security through hands-on labs, real-world scenarios, and mentorship from industry veterans. Join <span class="text-green">12,000+</span> certified professionals.</p>
+      <div class="hero-actions">
+        <a class="btn btn-green" onclick="navigate('courses')">$ EXPLORE COURSES</a>
+        <a class="btn btn-blue" onclick="navigate('register')">ENROLL NOW &gt;&gt;</a>
+        <a class="btn btn-outline" onclick="navigate('verify')">VERIFY CERT</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-num" id="stat-students">0</span><span class="hero-stat-label">Students Trained</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">94%</span><span class="hero-stat-label">Placement Rate</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">48</span><span class="hero-stat-label">Expert Mentors</span></div>
+        <div class="hero-stat"><span class="hero-stat-num">200+</span><span class="hero-stat-label">Partner Companies</span></div>
+      </div>
+    </div>
+    <div class="scroll-indicator"><div class="scroll-line"></div><div class="scroll-label">SCROLL</div></div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// LIVE ACTIVITY FEED</span>
+        <h2 class="section-title">The <span>Neural Map</span></h2>
+        <p class="section-desc">Real-time visualization of academy activity. Hover nodes for details.</p>
+      </div>
+      <div id="neural-map-container">
+        <canvas id="neural-canvas"></canvas>
+        <div class="neural-overlay"></div>
+        <div class="neural-feed">
+          <div class="neural-feed-title">// LIVE FEED</div>
+          <div id="neural-events"></div>
+        </div>
+        <div class="neural-coords" id="neural-coords">ROT: 0.00 | NODES: 10 | LATENCY: 4ms</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- COURSES PAGE -->
+<div class="page" id="page-courses">
+  <div class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// TRAINING MODULES</span>
+        <h2 class="section-title">Academy <span>Departments</span></h2>
+        <p class="section-desc">Choose your specialization. All courses include hands-on labs and a verified certificate.</p>
+      </div>
+      <div class="dept-tabs" id="dept-tabs">
+        <div class="dept-tab active" onclick="filterDept(this,'all')">ALL MODULES</div>
+        <div class="dept-tab" onclick="filterDept(this,'ethical')">ETHICAL HACKING</div>
+        <div class="dept-tab" onclick="filterDept(this,'osint')">OSINT</div>
+        <div class="dept-tab" onclick="filterDept(this,'law')">CYBER LAW</div>
+        <div class="dept-tab" onclick="filterDept(this,'forensics')">FORENSICS</div>
+        <div class="dept-tab" onclick="filterDept(this,'cloud')">CLOUD SEC</div>
+      </div>
+      <div class="courses-grid" id="courses-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- VERIFY PAGE -->
+<div class="page" id="page-verify">
+  <div class="section section-alt">
+    <div class="container" style="max-width:780px">
+      <div class="section-header">
+        <span class="section-tag">// VERIFICATION ENGINE v2.1</span>
+        <h2 class="section-title">Security <span>Clearance</span> Check</h2>
+        <p class="section-desc">Verify authenticity of certificates, team members, and partner organizations using unique IDs.</p>
+      </div>
+      <div class="verify-tabs">
+        <div class="verify-tab active" onclick="switchVerify(this,'certificate')">CERTIFICATE</div>
+        <div class="verify-tab" onclick="switchVerify(this,'member')">TEAM MEMBER</div>
+        <div class="verify-tab" onclick="switchVerify(this,'partner')">PARTNER ORG</div>
+      </div>
+      <div class="verify-box">
+        <div class="verify-input-group">
+          <input class="verify-input" id="verify-input" placeholder="Enter ID (e.g. CSA-2024-001337)" maxlength="50" onkeydown="if(event.key==='Enter')verifyID()">
+          <button class="verify-btn" onclick="verifyID()">⚡ VERIFY</button>
+        </div>
+        <div style="text-align:center;font-family:var(--font-mono);font-size:.62rem;color:var(--text3);margin-bottom:1.25rem;letter-spacing:2px">— OR USE DEMO IDs BELOW —</div>
+        <div id="verify-result" class="verify-result"></div>
+        <div style="margin-top:1.75rem;padding-top:1.75rem;border-top:1px solid var(--border)">
+          <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:2px;margin-bottom:.75rem">// DEMO IDs — CLICK TO TEST</div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap" id="demo-ids"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PARTNERS PAGE -->
+<div class="page" id="page-partners">
+  <div class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// B2B COLLABORATION PORTAL</span>
+        <h2 class="section-title">Partner <span>With Us</span></h2>
+        <p class="section-desc">Submit collaboration proposals for universities, corporations, and strategic partnerships.</p>
+      </div>
+      <div class="b2b-grid">
+        <div class="b2b-card">
+          <div class="b2b-card-title">Submit Proposal</div>
+          <div class="b2b-card-sub">// ENCRYPTED — SSL/TLS 1.3</div>
+          <div class="form-group">
+            <label class="form-label">Organization Type</label>
+            <select class="form-select" id="org-type">
+              <option value="">Select type...</option>
+              <option>University / College</option>
+              <option>Corporate Partner</option>
+              <option>Government Entity</option>
+              <option>NGO / Non-Profit</option>
+              <option>Startup Accelerator</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Organization Name</label>
+            <input class="form-input" id="org-name" placeholder="e.g. IIT Bombay Cyber Lab">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Email</label>
+            <input class="form-input" id="org-email" type="email" placeholder="contact@organization.ac.in">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Proposal Details</label>
+            <textarea class="form-textarea" id="org-proposal" placeholder="Describe scope, objectives, expected outcomes..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Attach Document (PDF/DOCX)</label>
+            <div class="file-drop" id="file-drop" ondragover="handleDragOver(event)" ondrop="handleDrop(event)" onclick="document.getElementById('file-input').click()">
+              <div class="file-drop-icon">📎</div>
+              <div class="file-drop-label">Drag &amp; drop or click to upload</div>
+              <div id="file-name" style="font-family:var(--font-mono);font-size:.62rem;color:var(--green);margin-top:.4rem"></div>
+            </div>
+            <input type="file" id="file-input" style="display:none" accept=".pdf,.docx,.doc" onchange="handleFileSelect(this)">
+          </div>
+          <button class="submit-btn" onclick="submitProposal()">⟶ SUBMIT PROPOSAL</button>
+        </div>
+        <div class="b2b-card">
+          <div class="b2b-card-title">Proposal Tracker</div>
+          <div class="b2b-card-sub">// REAL-TIME STATUS MONITOR</div>
+          <div id="proposal-list" style="margin-top:.75rem"></div>
+          <div style="margin-top:1.75rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+            <div class="b2b-card-title" style="font-size:.9rem;margin-bottom:.9rem">Active Partners</div>
+            <div id="active-partners-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLACEMENTS PAGE -->
+<div class="page" id="page-placements">
+  <div class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// CAREER &amp; UNIVERSITY HUB</span>
+        <h2 class="section-title">Placements &amp; <span>Degrees</span></h2>
+        <p class="section-desc">Direct pathways to partner corporations and academic institutions. 94% placement within 6 months.</p>
+      </div>
+      <div style="display:flex;gap:2rem;flex-wrap:wrap">
+        <div style="flex:1;min-width:300px">
+          <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--blue);letter-spacing:3px;margin-bottom:1rem">// CORPORATE PARTNERS</div>
+          <div class="partners-grid" id="corp-partners"></div>
+        </div>
+        <div style="width:280px;min-width:260px">
+          <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--purple);letter-spacing:3px;margin-bottom:1rem">// UNIVERSITY PATHWAYS</div>
+          <div id="uni-partners"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFLINE CENTERS -->
+<div class="page" id="page-offline">
+  <div class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// PHYSICAL TRAINING CENTERS</span>
+        <h2 class="section-title">Offline <span>Units</span></h2>
+        <p class="section-desc">Fully equipped training centers with advanced labs, hardware hacking rigs, and certified instructors.</p>
+      </div>
+      <div class="offline-grid" id="offline-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="page" id="page-login">
+  <div class="auth-page">
+    <canvas style="position:absolute;inset:0;width:100%;height:100%" id="login-canvas"></canvas>
+    <div class="auth-card" data-title="// SECURE ACCESS PORTAL">
+      <div class="auth-logo"><div class="auth-logo-text">CSA</div><div class="auth-logo-sub">CYBERSCHOOL ACADEMY</div></div>
+      <div class="auth-title">Access Terminal</div>
+      <div class="auth-sub">// AUTHENTICATE TO CONTINUE</div>
+      <div class="form-group"><label class="form-label">Email / Username</label><input class="form-input" id="login-email" type="email" placeholder="agent@cyberschool.ac" autocomplete="email"></div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div style="position:relative">
+          <input class="form-input" id="login-pass" type="password" placeholder="••••••••••" style="padding-right:2.5rem" autocomplete="current-password">
+          <button onclick="togglePass('login-pass',this)" style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:none;font-size:.8rem;padding:.2rem">👁</button>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="handleLogin()">⟶ AUTHENTICATE</button>
+      <div class="auth-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">OR</div><div class="auth-divider-line"></div></div>
+      <button class="submit-btn" style="background:#00d4ff08;border-color:var(--blue);color:var(--blue)" onclick="showToast('OAuth integration coming soon','info')">⟶ SIGN IN WITH GOOGLE</button>
+      <div class="auth-footer">No account? <a onclick="navigate('register')">Enroll Now →</a></div>
+      <div style="margin-top:1rem;padding:.75rem;background:var(--surface2);border:1px solid var(--border)">
+        <div style="font-family:var(--font-mono);font-size:.58rem;color:var(--text3);letter-spacing:2px;margin-bottom:.4rem">// DEMO CREDENTIALS</div>
+        <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--green);cursor:none" onclick="document.getElementById('login-email').value='admin@cyberschool.ac';document.getElementById('login-pass').value='admin123'">admin@cyberschool.ac / admin123 (click to fill)</div>
+        <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--blue);margin-top:.2rem;cursor:none" onclick="document.getElementById('login-email').value='student@cyberschool.ac';document.getElementById('login-pass').value='student123'">student@cyberschool.ac / student123 (click to fill)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER PAGE -->
+<div class="page" id="page-register">
+  <div class="auth-page">
+    <canvas style="position:absolute;inset:0;width:100%;height:100%" id="register-canvas"></canvas>
+    <div class="auth-card" data-title="// NEW AGENT ENROLLMENT" style="max-width:500px">
+      <div class="auth-logo"><div class="auth-logo-text">CSA</div><div class="auth-logo-sub">CYBERSCHOOL ACADEMY</div></div>
+      <div class="auth-title">Enroll as Agent</div>
+      <div class="auth-sub">// CREATE YOUR SECURE IDENTITY</div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="reg-fname" placeholder="John"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="reg-lname" placeholder="Doe"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="reg-email" type="email" placeholder="agent@domain.com"></div>
+      <div class="form-group">
+        <label class="form-label">Choose Track</label>
+        <select class="form-select" id="reg-track">
+          <option value="">Select specialization...</option>
+          <option>Ethical Hacking</option><option>OSINT Analyst</option><option>Cyber Law</option>
+          <option>Digital Forensics</option><option>Cloud Security</option><option>Red Team Operations</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Create Password</label>
+        <input class="form-input" id="reg-pass" type="password" placeholder="Min 8 characters" oninput="checkPassStrength(this.value)">
+        <div class="pass-strength"><div class="pass-strength-fill" id="pass-fill"></div></div>
+        <div class="pass-label" id="pass-label">Enter password to check strength</div>
+      </div>
+      <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" id="reg-pass2" type="password" placeholder="Repeat password"></div>
+      <div style="margin-bottom:.9rem"><label style="display:flex;align-items:flex-start;gap:.5rem;cursor:none;font-family:var(--font-mono);font-size:.65rem;color:var(--text3);line-height:1.5"><input type="checkbox" id="reg-agree" style="accent-color:var(--green);margin-top:2px;flex-shrink:0">I agree to the Terms, Privacy Policy, and Ethical Use Agreement</label></div>
+      <button class="submit-btn" onclick="handleRegister()">⟶ CREATE SECURE ACCOUNT</button>
+      <div class="auth-footer">Already enrolled? <a onclick="navigate('login')">Login →</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div class="page" id="page-dashboard">
+  <div class="dashboard-layout">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">NAVIGATION</div>
+        <div class="sidebar-item active" onclick="showDashPanel('overview',this)">⬡ Overview</div>
+        <div class="sidebar-item" onclick="showDashPanel('courses',this)">◈ My Courses</div>
+        <div class="sidebar-item" onclick="showDashPanel('assignments',this)">◉ Assignments</div>
+        <div class="sidebar-item" onclick="showDashPanel('certificates',this)">◆ Certificates</div>
+        <div class="sidebar-item" onclick="showDashPanel('progress',this)">▸ Progress</div>
+      </div>
+      <div class="sidebar-section" id="admin-sidebar" style="display:none">
+        <div class="sidebar-label">ADMIN — GOD MODE</div>
+        <div class="sidebar-item" onclick="showDashPanel('admin',this)">⚡ Admin Panel</div>
+        <div class="sidebar-item" onclick="showDashPanel('certgen',this)">⬟ Cert Generator</div>
+        <div class="sidebar-item" onclick="showDashPanel('users',this)">◎ User Management</div>
+        <div class="sidebar-item" onclick="showDashPanel('logs',this)">≡ Activity Logs</div>
+      </div>
+    </div>
+    <div class="dashboard-main">
+      <!-- OVERVIEW -->
+      <div id="dash-overview" class="dash-panel">
+        <div class="dashboard-header">
+          <div><div class="dashboard-title">Command Center</div><div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text3);margin-top:.2rem">Welcome back, <span id="dash-username" class="text-green"></span></div></div>
+          <div style="display:flex;align-items:center;gap:.75rem"><div class="user-avatar" id="dash-avatar">U</div><div><div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text1)" id="dash-user-display"></div><div style="font-family:var(--font-mono);font-size:.58rem;color:var(--text3);letter-spacing:2px" id="dash-user-role">STUDENT AGENT</div></div></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card green"><div class="stat-num">3</div><div class="stat-label">COURSES DONE</div><div class="stat-change">↑ 1 this month</div></div>
+          <div class="stat-card blue"><div class="stat-num">7</div><div class="stat-label">LABS SOLVED</div><div class="stat-change">↑ 3 this week</div></div>
+          <div class="stat-card purple"><div class="stat-num" id="ds-certs">2</div><div class="stat-label">CERTIFICATES</div><div class="stat-change">↑ 1 new</div></div>
+          <div class="stat-card orange"><div class="stat-num">1,240</div><div class="stat-label">XP POINTS</div><div class="stat-change">Rank: Elite</div></div>
+        </div>
+        <div class="dash-grid-2">
+          <div class="progress-card">
+            <div class="progress-title">Current Progress</div>
+            <div class="progress-item"><div class="progress-item-header"><span class="progress-item-name">Ethical Hacking Pro</span><span class="progress-item-pct">72%</span></div><div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div></div>
+            <div class="progress-item"><div class="progress-item-header"><span class="progress-item-name">OSINT Mastery</span><span class="progress-item-pct">45%</span></div><div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div></div>
+            <div class="progress-item"><div class="progress-item-header"><span class="progress-item-name">Python for Hackers</span><span class="progress-item-pct">90%</span></div><div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div></div>
+            <div class="progress-item"><div class="progress-item-header"><span class="progress-item-name">Digital Forensics</span><span class="progress-item-pct">30%</span></div><div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div></div>
+          </div>
+          <div class="activity-feed">
+            <div class="progress-title">Activity Log</div>
+            <div id="user-activity"></div>
+          </div>
+        </div>
+      </div>
+      <!-- MY COURSES -->
+      <div id="dash-courses" class="dash-panel hidden">
+        <div class="dashboard-header"><div class="dashboard-title">My Courses</div></div>
+        <div id="my-courses-list"></div>
+      </div>
+      <!-- ASSIGNMENTS -->
+      <div id="dash-assignments" class="dash-panel hidden">
+        <div class="dashboard-header"><div class="dashboard-title">Assignments</div></div>
+        <div id="assignments-list"></div>
+      </div>
+      <!-- CERTIFICATES -->
+      <div id="dash-certificates" class="dash-panel hidden">
+        <div class="dashboard-header"><div class="dashboard-title">My Certificates</div></div>
+        <div id="certs-list"></div>
+      </div>
+      <!-- PROGRESS -->
+      <div id="dash-progress" class="dash-panel hidden">
+        <div class="dashboard-header"><div class="dashboard-title">Progress Analytics</div></div>
+        <div id="progress-analytics"></div>
+      </div>
+      <!-- ADMIN -->
+      <div id="dash-admin" class="dash-panel hidden">
+        <div class="dashboard-header"><div><div class="dashboard-title">Admin Panel</div><div class="admin-badge" style="margin-top:.5rem">⚡ GOD MODE ACTIVE</div></div></div>
+        <div class="stats-row">
+          <div class="stat-card green"><div class="stat-num" id="admin-total-students">0</div><div class="stat-label">TOTAL STUDENTS</div></div>
+          <div class="stat-card blue"><div class="stat-num" id="admin-proposals">0</div><div class="stat-label">PROPOSALS</div></div>
+          <div class="stat-card purple"><div class="stat-num" id="admin-certs-count">0</div><div class="stat-label">CERTS ISSUED</div></div>
+          <div class="stat-card orange"><div class="stat-num">99.9%</div><div class="stat-label">UPTIME</div></div>
+        </div>
+        <div id="admin-users-table"></div>
+      </div>
+      <!-- CERT GENERATOR -->
+      <div id="dash-certgen" class="dash-panel hidden">
+        <div class="dashboard-header"><div class="dashboard-title">Certificate Generator</div></div>
+        <div class="cert-generator">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+            <div class="form-group"><label class="form-label">Student Name</label><input class="form-input" id="cg-name" placeholder="Full Name"></div>
+            <div class="form-group"><label class="form-label">Course</label><select class="form-select" id="cg-course"><option>Ethical Hacking Pro</option><option>OSINT Mastery</option><option>Cyber Law &amp; Policy</option><option>Digital Forensics</option><option>Cloud Security</option></select></div>
+            <div class="form-group"><label class="form-label">Grade</label><select class="form-select" id="cg-grade"><option>Distinction</option><option>Merit</option><option>Pass</option></select></div>
+          </div>
+          <button class="submit-btn" style="width:auto;padding:.6rem 2rem" onclick="generateCert()">⟶ GENERATE CERTIFICATE</button>
+          <div class="cert-preview" id="cert-preview" style="display:none"></div>
+        </div>
+      </div>
+      <!-- USER MANAGEMENT -->
+      <div id="dash-users" class="dash-panel hidden">
+        <div class="dashboard-header"><div class="dashboard-title">User Management</div></div>
+        <div id="user-mgmt-table"></div>
+      </div>
+      <!-- LOGS -->
+      <div id="dash-logs" class="dash-panel hidden">
+        <div class="dashboard-header"><div class="dashboard-title">Activity Logs</div></div>
+        <div id="activity-logs-container" style="background:var(--surface2);border:1px solid var(--border);padding:1rem;font-family:var(--font-mono);font-size:.68rem;height:420px;overflow-y:auto;color:var(--green)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end app -->
+
+<!-- 2FA MODAL -->
+<div class="modal-overlay" id="twofa-modal">
+  <div class="modal-box">
+    <div style="font-family:var(--font-head);font-weight:700;font-size:1.15rem;margin-bottom:.4rem">Two-Factor Authentication</div>
+    <p style="font-family:var(--font-mono);font-size:.7rem;color:var(--text2);margin-bottom:.5rem">Enter the 6-digit code sent to your registered device.</p>
+    <div class="otp-inputs" id="otp-inputs">
+      <input class="otp-input" maxlength="1" oninput="otpInput(this,0)" onkeydown="otpKey(event,0)">
+      <input class="otp-input" maxlength="1" oninput="otpInput(this,1)" onkeydown="otpKey(event,1)">
+      <input class="otp-input" maxlength="1" oninput="otpInput(this,2)" onkeydown="otpKey(event,2)">
+      <input class="otp-input" maxlength="1" oninput="otpInput(this,3)" onkeydown="otpKey(event,3)">
+      <input class="otp-input" maxlength="1" oninput="otpInput(this,4)" onkeydown="otpKey(event,4)">
+      <input class="otp-input" maxlength="1" oninput="otpInput(this,5)" onkeydown="otpKey(event,5)">
+    </div>
+    <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--blue);margin-bottom:1rem;padding:.5rem;background:var(--surface3);border:1px solid var(--border)" id="otp-hint"></div>
+    <button class="submit-btn" onclick="verify2FA()">VERIFY &amp; LOGIN →</button>
+    <button class="submit-btn" style="background:transparent;border-color:var(--border2);color:var(--text3);margin-top:.4rem" onclick="document.getElementById('twofa-modal').classList.remove('show')">CANCEL</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="main-footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">CyberSchool Academy</div>
+      <p>India's premier cybersecurity training institute. Elite training for the next generation of cyber defenders and ethical hackers.</p>
+      <div style="margin-top:1.25rem;font-family:var(--font-mono);font-size:.62rem;color:var(--green)">🔒 SSL SECURED &nbsp;⚡ DDOS PROTECTED &nbsp;✓ ISO 27001</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Courses</div>
+      <a class="footer-link" onclick="navigate('courses')">Ethical Hacking</a>
+      <a class="footer-link" onclick="navigate('courses')">OSINT Mastery</a>
+      <a class="footer-link" onclick="navigate('courses')">Cyber Law</a>
+      <a class="footer-link" onclick="navigate('courses')">Digital Forensics</a>
+      <a class="footer-link" onclick="navigate('courses')">Cloud Security</a>
+    </div>
+    <div>
+      <div class="footer-col-title">Academy</div>
+      <a class="footer-link" onclick="navigate('verify')">Verify Certificate</a>
+      <a class="footer-link" onclick="navigate('partners')">Partner With Us</a>
+      <a class="footer-link" onclick="navigate('placements')">Placements</a>
+      <a class="footer-link" onclick="navigate('offline')">Training Centers</a>
+    </div>
+    <div>
+      <div class="footer-col-title">Security</div>
+      <a class="footer-link">Privacy Policy</a>
+      <a class="footer-link">Terms of Service</a>
+      <a class="footer-link">Ethical Use Policy</a>
+      <a class="footer-link">Bug Bounty Program</a>
+      <a class="footer-link">Contact Us</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-text">© 2025 CyberSchool Academy · All rights reserved · Unauthorized access is a criminal offense under IT Act 2000</div>
+    <div style="font-family:var(--font-mono);font-size:.58rem;color:var(--text3)">NODE: <span class="text-green">CSA-PROD-007</span> BUILD: <span class="text-green">v4.2.1</span></div>
+  </div>
+</footer>
+
+<script>
+// ===== DATA =====
+const COURSES=[
+  {id:'C001',title:'Ethical Hacking Pro',dept:'ethical',desc:'Complete penetration testing from recon to exploitation. 50+ hands-on labs, real-world targets.',price:'₹24,999',seats:12,maxSeats:30,tags:['CEH','OSCP-Prep','Hands-On'],duration:'6 months',level:'Advanced'},
+  {id:'C002',title:'OSINT Mastery',dept:'osint',desc:'Open source intelligence gathering with Maltego, Shodan, Recon-ng, and advanced OSINT frameworks.',price:'₹18,999',seats:8,maxSeats:25,tags:['OSINT','Recon','Threat Intel'],duration:'4 months',level:'Intermediate'},
+  {id:'C003',title:'Cyber Law & Policy',dept:'law',desc:'Indian IT Act, GDPR, cybercrime law, digital evidence handling, and legal frameworks for cyber cases.',price:'₹14,999',seats:20,maxSeats:40,tags:['IT Act','GDPR','Legal'],duration:'3 months',level:'Beginner'},
+  {id:'C004',title:'Digital Forensics',dept:'forensics',desc:'Disk imaging, memory forensics, network analysis, and courtroom-ready evidence presentation techniques.',price:'₹22,999',seats:5,maxSeats:20,tags:['Forensics','Autopsy','Volatility'],duration:'5 months',level:'Advanced'},
+  {id:'C005',title:'Cloud Security Architect',dept:'cloud',desc:'AWS, Azure, GCP security architecture, IAM policies, cloud-native security tools and incident response.',price:'₹28,999',seats:15,maxSeats:35,tags:['AWS','Azure','CSSP'],duration:'4 months',level:'Expert'},
+  {id:'C006',title:'Red Team Operations',dept:'ethical',desc:'Full red team campaign planning, C2 frameworks, AV evasion techniques, and professional reporting.',price:'₹34,999',seats:3,maxSeats:15,tags:['Red Team','C2','Cobalt Strike'],duration:'8 months',level:'Expert'},
+  {id:'C007',title:'OSINT & Social Engineering',dept:'osint',desc:'Combine OSINT with social engineering tactics for comprehensive security assessments.',price:'₹21,999',seats:11,maxSeats:25,tags:['Social Eng','OSINT','Phishing'],duration:'3 months',level:'Intermediate'},
+  {id:'C008',title:'Mobile App Pentesting',dept:'ethical',desc:'Android/iOS application security testing using Frida, Objection, Burp Suite, and mobile malware analysis.',price:'₹19,999',seats:18,maxSeats:30,tags:['Android','iOS','OWASP'],duration:'4 months',level:'Intermediate'},
+  {id:'C009',title:'Cyber Law for Corporates',dept:'law',desc:'Data protection, IP law, corporate liability, compliance frameworks (ISO 27001, DPDP Act) for enterprises.',price:'₹16,999',seats:25,maxSeats:50,tags:['Compliance','DPDP','ISO 27001'],duration:'2 months',level:'Beginner'},
+];
+
+const VERIFY_DB={
+  'CSA-2024-001337':{type:'certificate',name:'Arjun Sharma',course:'Ethical Hacking Pro',date:'2024-08-15',grade:'Distinction',status:'valid',issuer:'Dr. Priya Mehta'},
+  'CSA-2024-007842':{type:'certificate',name:'Fatima Noor',course:'OSINT Mastery',date:'2024-10-22',grade:'Merit',status:'valid',issuer:'Rahul Verma'},
+  'CSA-TEAM-001':{type:'member',name:'Dr. Priya Mehta',role:'Head — Ethical Hacking Dept',joined:'2022-01-01',status:'valid',clearance:'ADMIN'},
+  'CSA-TEAM-002':{type:'member',name:'Rahul Verma',role:'Senior OSINT Instructor',joined:'2022-06-15',status:'valid',clearance:'INSTRUCTOR'},
+  'CSA-PART-CYB':{type:'partner',org:'CyberShield Technologies Pvt. Ltd.',since:'2023-01-01',status:'valid',tier:'Gold Partner'},
+  'CSA-FAKE-999':{type:'certificate',name:'John Smith',course:'Advanced Hacking',date:'2023-01-01',grade:'Pass',status:'fake'},
+  'CSA-EXP-2022':{type:'certificate',name:'Old Student',course:'Basic IT Security',date:'2022-01-01',grade:'Pass',status:'expired'},
+};
+
+const NEURAL_EVENTS=[
+  '✓ Certificate Verified — CSA-2024-001337','⟳ Enrollment — Ethical Hacking Pro','⚡ Lab Done — SQL Injection 101',
+  '✓ Assignment Submitted — Module 7','⟳ Partner Joined — DataFortress Inc','⚡ CTF Solved — CryptoChallenge #42',
+  '✓ Certificate Generated — OSINT Course','⟳ Student Enrolled — Cloud Security','⚡ Admin 2FA Verified','✓ B2B Proposal Approved — NIT Delhi',
+  '⟳ 3 New Students Enrolled','⚡ Lab Opened — Buffer Overflow','✓ Partner Verified — TCS Cyber',
+];
+
+const CORP_PARTNERS=[
+  {name:'CyberShield',type:'Corporate',openings:12},{name:'HackSecure',type:'Startup',openings:5},
+  {name:'DataFortress',type:'Enterprise',openings:8},{name:'NetGuard Pro',type:'Corporate',openings:3},
+  {name:'InfoSec Labs',type:'R&D',openings:7},{name:'CryptoDefend',type:'Fintech',openings:4},
+];
+
+const UNI_PARTNERS=[
+  {name:'IIT Bombay',degree:'M.Tech Cybersecurity',intake:40},
+  {name:'NIT Delhi',degree:'B.Tech InfoSec',intake:60},
+  {name:'BITS Pilani',degree:'M.Sc Digital Forensics',intake:30},
+  {name:'VIT Vellore',degree:'MBA Cyber Management',intake:45},
+];
+
+const OFFLINE_CENTERS=[
+  {city:'Mumbai',address:'Level 8, Cyber Tower, BKC, Mumbai 400051',badges:['lab','cert','corp'],capacity:'Capacity: 120 seats'},
+  {city:'Delhi NCR',address:'Block-C, Cyber Hub, Gurugram, Haryana 122002',badges:['lab','cert'],capacity:'Capacity: 80 seats'},
+  {city:'Bangalore',address:'4th Floor, Tech Park, Whitefield, Bangalore 560066',badges:['lab','cert','corp'],capacity:'Capacity: 150 seats'},
+  {city:'Hyderabad',address:'IT Tower 2, HITEC City, Hyderabad 500081',badges:['lab'],capacity:'Capacity: 60 seats'},
+  {city:'Pune',address:'Innovation Hub, Hinjewadi Phase 2, Pune 411057',badges:['cert','corp'],capacity:'Capacity: 70 seats'},
+  {city:'Chennai',address:'Tidel Park, Taramani, Chennai 600113',badges:['lab','cert'],capacity:'Capacity: 90 seats'},
+];
+
+const ASSIGNMENTS=[
+  {title:'Module 4: Reconnaissance Lab',course:'Ethical Hacking Pro',due:'2025-05-20',status:'pending'},
+  {title:'OSINT Target Analysis Report',course:'OSINT Mastery',due:'2025-05-15',status:'submitted'},
+  {title:'Legal Brief — IT Act Case Study',course:'Cyber Law & Policy',due:'2025-04-30',status:'overdue'},
+  {title:'Memory Forensics Writeup',course:'Digital Forensics',due:'2025-05-25',status:'pending'},
+  {title:'AWS IAM Policy Audit',course:'Cloud Security',due:'2025-06-01',status:'pending'},
+];
+
+const MY_CERTS=[
+  {id:'CSA-2024-001337',course:'Ethical Hacking Pro',date:'2024-08-15',grade:'Distinction'},
+  {id:'CSA-2024-009001',course:'Python for Hackers',date:'2024-11-10',grade:'Merit'},
+];
+
+// ===== STATE =====
+let currentUser=null,loginAttemptUser=null,current2FACode='',currentPage='home';
+let proposals=JSON.parse(localStorage.getItem('csa_proposals')||'[]');
+let users=JSON.parse(localStorage.getItem('csa_users')||'[]');
+let logs=JSON.parse(localStorage.getItem('csa_logs')||'[]');
+let generatedCerts=JSON.parse(localStorage.getItem('csa_certs')||'[]');
+
+// Seed users
+if(!users.some(u=>u.email==='admin@cyberschool.ac')){
+  users.push({id:'USR001',email:'admin@cyberschool.ac',password:'admin123',name:'Admin Override',role:'admin',joined:new Date().toISOString(),track:'Administration'});
+  localStorage.setItem('csa_users',JSON.stringify(users));
+}
+if(!users.some(u=>u.email==='student@cyberschool.ac')){
+  users.push({id:'USR002',email:'student@cyberschool.ac',password:'student123',name:'Alex Hacker',role:'student',joined:new Date().toISOString(),track:'Ethical Hacking'});
+  localStorage.setItem('csa_users',JSON.stringify(users));
+}
+
+// ===== CURSOR =====
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+setInterval(()=>{rx+=(mx-rx)*.15;ry+=(my-ry)*.15;ring.style.left=rx+'px';ring.style.top=ry+'px'},16);
+document.addEventListener('mousedown',()=>{cursor.style.width='6px';cursor.style.height='6px';ring.style.width='48px';ring.style.height='48px'});
+document.addEventListener('mouseup',()=>{cursor.style.width='12px';cursor.style.height='12px';ring.style.width='36px';ring.style.height='36px'});
+
+// ===== TOAST =====
+function showToast(msg,type='info',icon=''){
+  const icons={success:'✓',error:'✗',info:'ℹ'};
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span style="flex-shrink:0">${icon||icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+
+// ===== LOGGING =====
+function addLog(msg){
+  const ts=new Date().toISOString();
+  logs.unshift(`[${ts}] ${msg}`);
+  if(logs.length>200)logs.pop();
+  localStorage.setItem('csa_logs',JSON.stringify(logs));
+}
+
+// ===== CINEMATIC INTRO =====
+function runIntro(){
+  const canvas=document.getElementById('intro-canvas'),ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  const cols=Math.floor(canvas.width/14),drops=Array.from({length:cols},()=>Math.random()*50);
+  const chars='アイウエオカキクケコ0123456789ABCDEF<>{}[]|/\\*&%$#@!?';
+  let matInterval;
+  function drawMatrix(){
+    ctx.fillStyle='rgba(0,0,0,0.055)';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.font='12px JetBrains Mono';
+    drops.forEach((y,i)=>{
+      const c=chars[Math.floor(Math.random()*chars.length)];
+      const x=i*14;
+      const brightness=Math.random();
+      ctx.fillStyle=brightness>.97?'rgba(255,255,255,0.9)':brightness>.85?'rgba(0,255,65,0.9)':`rgba(0,255,65,${.2+brightness*.4})`;
+      ctx.fillText(c,x,y*14);
+      if(y*14>canvas.height&&Math.random()>.95)drops[i]=0;
+      drops[i]+=.6;
+    });
+  }
+  matInterval=setInterval(drawMatrix,35);
+  const vaultRings=document.querySelectorAll('.vault-ring');
+  setTimeout(()=>vaultRings.forEach(r=>r.style.opacity='1'),200);
+  const steps=[
+    {p:8,m:'INITIALIZING SECURE BOOT SEQUENCE...'},
+    {p:20,m:'LOADING ENCRYPTION MODULES [AES-256]...'},
+    {p:35,m:'ESTABLISHING NEURAL NETWORK TOPOLOGY...'},
+    {p:48,m:'VERIFYING CERTIFICATE CHAIN [CA:ROOT]...'},
+    {p:62,m:'CALIBRATING THREAT DETECTION SYSTEMS...'},
+    {p:75,m:'DECRYPTING VAULT ARCHIVE [RSA-4096]...'},
+    {p:88,m:'AUTHENTICATING BIOMETRIC SIGNATURE...'},
+    {p:96,m:'OPENING VAULT DOOR...'},
+    {p:100,m:'ACCESS GRANTED — WELCOME, AGENT ✓'},
+  ];
+  const prog=document.getElementById('intro-progress'),status=document.getElementById('intro-status');
+  const logo=document.getElementById('intro-logo'),sub=document.getElementById('intro-sub');
+  let si=0;
+  function nextStep(){
+    if(si>=steps.length){
+      clearInterval(matInterval);
+      logo.style.cssText='opacity:1;transition:opacity .6s';
+      sub.style.cssText='opacity:1;transition:opacity .6s .3s';
+      document.getElementById('vault-lock').textContent='✓';
+      document.getElementById('vault-lock').style.color='var(--blue)';
+      setTimeout(completeIntro,1800);return;
+    }
+    const s=steps[si++];
+    prog.style.width=s.p+'%';status.textContent=s.m;
+    setTimeout(nextStep,380+Math.random()*250);
+  }
+  setTimeout(nextStep,500);
+}
+
+function completeIntro(){
+  const intro=document.getElementById('cinematic-intro');
+  intro.style.cssText='opacity:0;transition:opacity .9s;pointer-events:none';
+  setTimeout(()=>{
+    intro.style.display='none';
+    document.getElementById('app').classList.add('visible');
+    document.getElementById('loading-screen').classList.add('hidden');
+    initAll();
+  },900);
+}
+
+function skipIntro(){
+  document.getElementById('intro-progress').style.cssText='width:100%;transition:none';
+  setTimeout(completeIntro,200);
+}
+
+function initAll(){
+  initHeroCanvas();initNeuralMap();initCourses();initVerify();
+  initPartners();initPlacements();initOffline();checkAuth();
+}
+
+// ===== NAVIGATION =====
+function navigate(page){
+  currentPage=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const t=document.getElementById('page-'+page);if(t)t.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.toggle('active',l.dataset&&l.dataset.page===page));
+  const footerHide=['login','register','dashboard'];
+  document.getElementById('main-footer').style.display=footerHide.includes(page)?'none':'block';
+  window.scrollTo(0,0);
+  if(page==='dashboard')initDashboard();
+  if(page==='login'||page==='register')initAuthCanvas(page);
+  addLog(`NAV: User navigated to /${page}`);
+  // close search
+  document.getElementById('cli-search').classList.remove('open');
+  document.getElementById('cli-input').value='';
+}
+
+// ===== HERO CANVAS =====
+let heroAnimId;
+function initHeroCanvas(){
+  const canvas=document.getElementById('hero-canvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=canvas.offsetWidth||window.innerWidth;canvas.height=canvas.offsetHeight||window.innerHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+  const nodes=Array.from({length:60},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:Math.random()*2+.5}));
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    nodes.forEach(n=>{
+      n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>canvas.width)n.vx*=-1;
+      if(n.y<0||n.y>canvas.height)n.vy*=-1;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(0,255,65,0.35)';ctx.fill();
+    });
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const d=Math.hypot(nodes[i].x-nodes[j].x,nodes[i].y-nodes[j].y);
+        if(d<130){
+          ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.strokeStyle=`rgba(0,212,255,${(1-d/130)*.12})`;ctx.lineWidth=.5;ctx.stroke();
+        }
+      }
+    }
+    heroAnimId=requestAnimationFrame(draw);
+  }
+  if(heroAnimId)cancelAnimationFrame(heroAnimId);
+  draw();
+  animateCounter('stat-students',0,12847,2200);
+}
+
+function animateCounter(id,from,to,dur){
+  const el=document.getElementById(id);if(!el)return;
+  const s=Date.now();
+  function upd(){const p=Math.min((Date.now()-s)/dur,1);const e=1-Math.pow(1-p,3);el.textContent=Math.floor(from+e*(to-from)).toLocaleString();if(p<1)requestAnimationFrame(upd);}
+  upd();
+}
+
+// ===== NEURAL MAP =====
+function initNeuralMap(){
+  const canvas=document.getElementById('neural-canvas');if(!canvas)return;
+  const container=document.getElementById('neural-map-container');
+  canvas.width=container.offsetWidth||900;canvas.height=480;
+  const ctx=canvas.getContext('2d');
+  const nodeLabels=['Mumbai HQ','Delhi Center','Cert Engine','OSINT Lab','Student DB','Partner API','CTF Server','Verify Node','Admin Core','Firewall Node'];
+  const nodeColors=['#00ff41','#00d4ff','#7b2fff','#ff6b2b','#00ff41','#00d4ff','#ff3366','#00ff41','#ffd700','#00d4ff'];
+  
+  const W=canvas.width,H=canvas.height,CX=W/2,CY=H/2,R=160;
+  const nodes3d=nodeLabels.map((label,i)=>{
+    const angle=(i/nodeLabels.length)*Math.PI*2;
+    const elevation=(Math.random()-.5)*1.2;
+    return {
+      label,color:nodeColors[i],
+      ox:Math.cos(angle)*R,oy:Math.sin(elevation)*80,oz:Math.sin(angle)*R,
+      pulse:Math.random()*Math.PI*2,pulseSpeed:.02+Math.random()*.02,
+      connections:[(i+1)%nodeLabels.length,(i+3)%nodeLabels.length]
+    };
+  });
+  
+  let rotY=0,hovered=-1;
+  const packets=[];
+  
+  function project(x,y,z){
+    const cosR=Math.cos(rotY),sinR=Math.sin(rotY);
+    const rx=x*cosR+z*sinR,rz=-x*sinR+z*cosR;
+    const fov=400,scale=fov/(fov+rz+300);
+    return {sx:CX+rx*scale,sy:CY+y*scale,scale,rz};
+  }
+  
+  function drawNeural(){
+    ctx.fillStyle='rgba(5,5,5,0.25)';ctx.fillRect(0,0,W,H);
+    rotY+=.003;
+    
+    // grid floor
+    ctx.strokeStyle='rgba(0,255,65,0.04)';ctx.lineWidth=1;
+    for(let x=-300;x<=300;x+=60){
+      const p1=project(x,-80,-300),p2=project(x,-80,300);
+      ctx.beginPath();ctx.moveTo(p1.sx,p1.sy);ctx.lineTo(p2.sx,p2.sy);ctx.stroke();
+    }
+    for(let z=-300;z<=300;z+=60){
+      const p1=project(-300,-80,z),p2=project(300,-80,z);
+      ctx.beginPath();ctx.moveTo(p1.sx,p1.sy);ctx.lineTo(p2.sx,p2.sy);ctx.stroke();
+    }
+    
+    const projected=nodes3d.map(n=>({...n,...project(n.ox,n.oy,n.oz)}));
+    projected.sort((a,b)=>a.rz-b.rz);
+    
+    // connections
+    projected.forEach(n=>{
+      n.connections.forEach(ci=>{
+        const target=projected.find(t=>t.label===nodeLabels[ci]);
+        if(!target)return;
+        const grad=ctx.createLinearGradient(n.sx,n.sy,target.sx,target.sy);
+        grad.addColorStop(0,n.color+'33');
+        grad.addColorStop(1,target.color+'11');
+        ctx.beginPath();ctx.moveTo(n.sx,n.sy);ctx.lineTo(target.sx,target.sy);
+        ctx.strokeStyle=grad;ctx.lineWidth=n.scale*.8;ctx.stroke();
+      });
+    });
+    
+    // packets
+    if(Math.random()<.02){
+      const src=Math.floor(Math.random()*projected.length);
+      const dst=(src+1+Math.floor(Math.random()*(projected.length-1)))%projected.length;
+      packets.push({src,dst,t:0,speed:.015+Math.random()*.01});
+    }
+    packets.forEach((p,i)=>{
+      p.t+=p.speed;
+      if(p.t>=1){packets.splice(i,1);return;}
+      const s=projected[p.src],d=projected[p.dst];
+      if(!s||!d)return;
+      const px=s.sx+(d.sx-s.sx)*p.t,py=s.sy+(d.sy-s.sy)*p.t;
+      ctx.beginPath();ctx.arc(px,py,3*s.scale,0,Math.PI*2);
+      ctx.fillStyle='#00ff41';ctx.fill();
+      ctx.shadowBlur=8;ctx.shadowColor='#00ff41';ctx.fill();ctx.shadowBlur=0;
+    });
+    
+    // nodes
+    projected.forEach((n,i)=>{
+      n.pulse+=n.pulseSpeed;
+      const r=6*n.scale,glow=Math.sin(n.pulse)*.5+.5;
+      ctx.beginPath();ctx.arc(n.sx,n.sy,r+glow*3,0,Math.PI*2);
+      ctx.fillStyle=n.color+'22';ctx.fill();
+      ctx.beginPath();ctx.arc(n.sx,n.sy,r,0,Math.PI*2);
+      ctx.fillStyle=n.color;ctx.fill();
+      ctx.shadowBlur=15*glow;ctx.shadowColor=n.color;ctx.fill();ctx.shadowBlur=0;
+      if(n.scale>0.8){
+        ctx.font=`${Math.floor(9*n.scale)}px JetBrains Mono`;
+        ctx.fillStyle=i===hovered?n.color:'rgba(200,200,200,0.7)';
+        ctx.fillText(n.label,n.sx+r+4,n.sy+4);
+      }
+    });
+    
+    document.getElementById('neural-coords').textContent=`ROT: ${rotY.toFixed(2)} | NODES: ${nodeLabels.length} | LATENCY: ${(3+Math.random()*3).toFixed(0)}ms`;
+    requestAnimationFrame(drawNeural);
+  }
+  drawNeural();
+  
+  // live events
+  const evContainer=document.getElementById('neural-events');
+  function addNeuralEvent(){
+    const ev=document.createElement('div');
+    ev.className='neural-event new';
+    ev.textContent=NEURAL_EVENTS[Math.floor(Math.random()*NEURAL_EVENTS.length)];
+    evContainer.insertBefore(ev,evContainer.firstChild);
+    setTimeout(()=>ev.classList.remove('new'),3000);
+    while(evContainer.children.length>6)evContainer.removeChild(evContainer.lastChild);
+  }
+  addNeuralEvent();
+  setInterval(addNeuralEvent,2800);
+}
+
+// ===== COURSES =====
+let currentDept='all';
+function initCourses(){renderCourses('all');}
+function filterDept(el,dept){
+  currentDept=dept;
+  document.querySelectorAll('.dept-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderCourses(dept);
+}
+function renderCourses(dept){
+  const grid=document.getElementById('courses-grid');
+  const filtered=dept==='all'?COURSES:COURSES.filter(c=>c.dept===dept);
+  grid.innerHTML=filtered.map(c=>{
+    const pct=Math.round((c.maxSeats-c.seats)/c.maxSeats*100);
+    const seatClass=c.seats<=5?'low':c.seats<=12?'med':'high';
+    const seatLabel=c.seats<=5?`⚠ ${c.seats} seats left`:c.seats<=12?`${c.seats} seats left`:`${c.seats} available`;
+    return `<div class="course-card">
+      <button class="pdf-badge" onclick="downloadSyllabus('${c.id}','${c.title}')">📄 SYLLABUS</button>
+      <div class="course-dept">${c.dept.toUpperCase()} DEPT</div>
+      <div class="course-title">${c.title}</div>
+      <div class="course-desc">${c.desc}</div>
+      <div class="course-meta">${c.tags.map(t=>`<span class="course-tag">${t}</span>`).join('')}<span class="course-tag" style="border-color:var(--purple);color:var(--purple)">${c.level}</span><span class="course-tag">${c.duration}</span></div>
+      <div class="course-seats"><span style="color:${seatClass==='low'?'var(--red)':seatClass==='med'?'var(--orange)':'var(--green)'}">${seatLabel}</span><div class="seats-bar"><div class="seats-fill ${seatClass}" style="width:${pct}%"></div></div></div>
+      <div class="course-footer"><div class="course-price">${c.price}</div><button class="course-enroll" onclick="enrollCourse('${c.id}','${c.title}')">ENROLL →</button></div>
+    </div>`;
+  }).join('');
+}
+
+function downloadSyllabus(id,title){
+  const content=`CYBERSCHOOL ACADEMY\nSYLLABUS — ${title.toUpperCase()}\nID: ${id}\n\nModule 1: Introduction & Environment Setup\nModule 2: Core Concepts & Fundamentals\nModule 3: Hands-On Lab Sessions\nModule 4: Advanced Techniques\nModule 5: Real-World Scenarios\nModule 6: Certification Exam Prep\n\nFor full syllabus, contact: academics@cyberschool.ac`;
+  const blob=new Blob([content],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`CSA_${id}_Syllabus.txt`;a.click();
+  showToast(`Syllabus downloaded: ${title}`,'success');
+  addLog(`DOWNLOAD: Syllabus ${id} downloaded`);
+}
+
+function enrollCourse(id,title){
+  if(!currentUser){showToast('Please login to enroll in courses','error');setTimeout(()=>navigate('login'),1500);return;}
+  showToast(`Enrolled in ${title}! Check your dashboard.`,'success');
+  addLog(`ENROLL: ${currentUser.email} enrolled in ${id}`);
+}
+
+// ===== VERIFY =====
+let currentVerifyType='certificate';
+function initVerify(){
+  const demoIds=Object.keys(VERIFY_DB);
+  document.getElementById('demo-ids').innerHTML=demoIds.map(id=>`<button style="font-family:var(--font-mono);font-size:.6rem;padding:.25rem .6rem;background:var(--surface3);border:1px solid var(--border2);color:var(--text3);cursor:none;transition:var(--transition)" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text3)'" onclick="document.getElementById('verify-input').value='${id}';verifyID()">${id}</button>`).join('');
+}
+
+function switchVerify(el,type){
+  currentVerifyType=type;
+  document.querySelectorAll('.verify-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('verify-input').placeholder=type==='certificate'?'Enter Cert ID (CSA-YYYY-XXXXXX)':type==='member'?'Enter Team ID (CSA-TEAM-XXX)':'Enter Partner ID (CSA-PART-XXX)';
+  document.getElementById('verify-result').className='verify-result';
+  document.getElementById('verify-result').innerHTML='';
+}
+
+function verifyID(){
+  const id=document.getElementById('verify-input').value.trim().toUpperCase();
+  if(!id){showToast('Please enter an ID to verify','error');return;}
+  const result=document.getElementById('verify-result');
+  result.innerHTML='<div style="font-family:var(--font-mono);color:var(--text3);font-size:.72rem">⟳ SCANNING DATABASE...</div>';
+  result.className='verify-result show';
+  addLog(`VERIFY: ID ${id} queried`);
+  setTimeout(()=>{
+    // Check generated certs too
+    const genCert=generatedCerts.find(c=>c.id===id);
+    const data=VERIFY_DB[id]||(genCert?{type:'certificate',name:genCert.name,course:genCert.course,date:genCert.date,grade:genCert.grade,status:'valid',issuer:'Admin Override'}:null);
+    if(!data){
+      result.className='verify-result invalid show';
+      result.innerHTML=`<div class="verify-status"><div class="status-icon invalid">✗</div><div><div class="status-label invalid">RECORD NOT FOUND</div><div style="font-family:var(--font-mono);font-size:.65rem;color:var(--text3)">ID: ${id}</div></div></div><div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text3)">This ID does not exist in our database. If you believe this is an error, contact verification@cyberschool.ac</div>`;
+      return;
+    }
+    const isValid=data.status==='valid';
+    const isFake=data.status==='fake';
+    const isExpired=data.status==='expired';
+    result.className=`verify-result ${isValid?'valid':'invalid'} show`;
+    const statusText=isValid?'✓ VERIFIED — AUTHENTIC':isFake?'⚠ FLAGGED — FRAUDULENT DOCUMENT':isExpired?'⏲ EXPIRED — NO LONGER VALID':'✗ INVALID';
+    const icon=isValid?'✓':isFake?'⚠':'✗';
+    let details='';
+    if(data.type==='certificate')details=`<div class="verify-detail"><div class="verify-detail-label">STUDENT</div><div class="verify-detail-value">${data.name}</div></div><div class="verify-detail"><div class="verify-detail-label">COURSE</div><div class="verify-detail-value">${data.course}</div></div><div class="verify-detail"><div class="verify-detail-label">ISSUED DATE</div><div class="verify-detail-value">${data.date}</div></div><div class="verify-detail"><div class="verify-detail-label">GRADE</div><div class="verify-detail-value">${data.grade}</div></div>${data.issuer?`<div class="verify-detail"><div class="verify-detail-label">ISSUER</div><div class="verify-detail-value">${data.issuer}</div></div>`:''}`;
+    else if(data.type==='member')details=`<div class="verify-detail"><div class="verify-detail-label">NAME</div><div class="verify-detail-value">${data.name}</div></div><div class="verify-detail"><div class="verify-detail-label">ROLE</div><div class="verify-detail-value">${data.role}</div></div><div class="verify-detail"><div class="verify-detail-label">JOINED</div><div class="verify-detail-value">${data.joined}</div></div><div class="verify-detail"><div class="verify-detail-label">CLEARANCE</div><div class="verify-detail-value">${data.clearance}</div></div>`;
+    else if(data.type==='partner')details=`<div class="verify-detail"><div class="verify-detail-label">ORGANIZATION</div><div class="verify-detail-value">${data.org}</div></div><div class="verify-detail"><div class="verify-detail-label">PARTNER SINCE</div><div class="verify-detail-value">${data.since}</div></div><div class="verify-detail"><div class="verify-detail-label">TIER</div><div class="verify-detail-value">${data.tier}</div></div>`;
+    result.innerHTML=`<div class="verify-status"><div class="status-icon ${isValid?'valid':'invalid'}">${icon}</div><div><div class="status-label ${isValid?'valid':'invalid'}">${statusText}</div><div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:2px">ID: ${id}</div></div></div><div class="verify-details">${details}</div>`;
+    addLog(`VERIFY: ${id} — ${data.status.toUpperCase()}`);
+  },900);
+}
+
+// ===== PARTNERS / B2B =====
+function initPartners(){
+  renderProposals();
+  const activeList=document.getElementById('active-partners-list');
+  if(activeList){
+    activeList.innerHTML=['CyberShield Tech','NIT Delhi','TCS Cyber Div','DataFortress','BITS Pilani'].map(p=>`<div style="display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:.68rem"><span style="color:var(--text2)">${p}</span><span style="color:var(--green)">ACTIVE</span></div>`).join('');
+  }
+}
+
+function renderProposals(){
+  const list=document.getElementById('proposal-list');if(!list)return;
+  if(!proposals.length){list.innerHTML='<div style="font-family:var(--font-mono);font-size:.68rem;color:var(--text3)">No proposals submitted yet.</div>';return;}
+  list.innerHTML=proposals.map(p=>{
+    const statusColors={submitted:['var(--blue)','active'],reviewing:['var(--orange)','active'],approved:['var(--green)','done'],rejected:['var(--red)','done']};
+    const [color,dotClass]=statusColors[p.status]||['var(--text3)','pending'];
+    return `<div style="background:var(--surface3);border:1px solid var(--border);padding:.9rem;margin-bottom:.5rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.5rem"><span style="font-family:var(--font-mono);font-size:.72rem;color:var(--text1)">${p.org}</span><span style="font-family:var(--font-mono);font-size:.58rem;color:${color};border:1px solid ${color};padding:.1rem .4rem">${p.status.toUpperCase()}</span></div>
+      <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3)">${p.type} · ${p.date}</div>
+      <div style="margin-top:.6rem;display:flex;gap:.5rem;align-items:center">
+        ${['submitted','reviewing','approved'].map(s=>`<div class="tracker-dot ${p.status==='approved'?'done':p.status===s?'active':'pending'}"></div><span class="tracker-label ${p.status==='approved'?'done':p.status===s?'active':'pending'}" style="font-size:.58rem">${s}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function handleDragOver(e){e.preventDefault();document.getElementById('file-drop').classList.add('dragover');}
+function handleDrop(e){e.preventDefault();document.getElementById('file-drop').classList.remove('dragover');const f=e.dataTransfer.files[0];if(f)document.getElementById('file-name').textContent='📎 '+f.name;}
+function handleFileSelect(input){if(input.files[0])document.getElementById('file-name').textContent='📎 '+input.files[0].name;}
+
+function submitProposal(){
+  const type=document.getElementById('org-type').value;
+  const name=document.getElementById('org-name').value.trim();
+  const email=document.getElementById('org-email').value.trim();
+  const proposal=document.getElementById('org-proposal').value.trim();
+  if(!type||!name||!email||!proposal){showToast('Please fill all required fields','error');return;}
+  if(!email.includes('@')){showToast('Invalid email address','error');return;}
+  const p={id:'PROP-'+Date.now(),org:name,type,email,proposal,status:'submitted',date:new Date().toLocaleDateString()};
+  proposals.unshift(p);
+  localStorage.setItem('csa_proposals',JSON.stringify(proposals));
+  // Auto-review
+  setTimeout(()=>{p.status='reviewing';localStorage.setItem('csa_proposals',JSON.stringify(proposals));renderProposals();},3000);
+  showToast(`Proposal submitted! Ref: ${p.id}`,'success');
+  addLog(`B2B: Proposal submitted by ${name} (${email})`);
+  document.getElementById('org-type').value='';
+  document.getElementById('org-name').value='';
+  document.getElementById('org-email').value='';
+  document.getElementById('org-proposal').value='';
+  document.getElementById('file-name').textContent='';
+  renderProposals();
+}
+
+// ===== PLACEMENTS =====
+function initPlacements(){
+  const corp=document.getElementById('corp-partners');
+  if(corp)corp.innerHTML=CORP_PARTNERS.map(p=>`<div class="partner-card"><div class="partner-logo">${p.name}</div><div class="partner-type">${p.type.toUpperCase()}</div><div class="partner-openings">${p.openings} openings</div></div>`).join('');
+  const uni=document.getElementById('uni-partners');
+  if(uni)uni.innerHTML=UNI_PARTNERS.map(u=>`<div class="uni-card"><div class="uni-name">${u.name}</div><div class="uni-degree">${u.degree}</div><div class="uni-intake">Annual Intake: ${u.intake} seats</div></div>`).join('');
+}
+
+// ===== OFFLINE =====
+function initOffline(){
+  const grid=document.getElementById('offline-grid');if(!grid)return;
+  grid.innerHTML=OFFLINE_CENTERS.map(c=>`<div class="offline-card"><div class="offline-city">📍 ${c.city}</div><div class="offline-address">${c.address}</div><div class="offline-badges">${c.badges.map(b=>`<span class="offline-badge ${b}">${b==='lab'?'🔬 LAB':b==='cert'?'✓ CERT EXAM':'🏢 CORP TRAINING'}</span>`).join('')}</div><div class="offline-capacity">${c.capacity}</div></div>`).join('');
+}
+
+// ===== AUTH CANVAS =====
+function initAuthCanvas(page){
+  const cid=page==='login'?'login-canvas':'register-canvas';
+  const canvas=document.getElementById(cid);if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=canvas.offsetWidth||window.innerWidth;canvas.height=canvas.offsetHeight||window.innerHeight;}
+  resize();
+  const cols=Math.floor(canvas.width/18);
+  const drops=Array.from({length:cols},()=>Math.random()*canvas.height/14);
+  const chars='01アイウカキ</>{}[]⊗✓✗';
+  function draw(){
+    ctx.fillStyle='rgba(10,10,10,0.06)';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.font='11px JetBrains Mono';
+    drops.forEach((y,i)=>{
+      const c=chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillStyle=`rgba(0,255,65,${.03+Math.random()*.1})`;
+      ctx.fillText(c,i*18,y*14);
+      if(y*14>canvas.height&&Math.random()>.97)drops[i]=0;
+      drops[i]+=.4;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ===== LOGIN =====
+function handleLogin(){
+  const email=document.getElementById('login-email').value.trim().toLowerCase();
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showToast('Enter email and password','error');return;}
+  const user=users.find(u=>u.email.toLowerCase()===email&&u.password===pass);
+  if(!user){showToast('Invalid credentials. Try demo creds below.','error');addLog(`AUTH: Failed login attempt for ${email}`);return;}
+  loginAttemptUser=user;
+  // Generate 2FA
+  current2FACode=String(Math.floor(100000+Math.random()*900000));
+  document.getElementById('otp-hint').textContent=`// DEMO: Your OTP code is ${current2FACode}`;
+  document.querySelectorAll('.otp-input').forEach(i=>i.value='');
+  document.getElementById('twofa-modal').classList.add('show');
+  document.querySelectorAll('.otp-input')[0].focus();
+  addLog(`AUTH: 2FA initiated for ${email}`);
+}
+
+function otpInput(el,idx){
+  if(el.value&&idx<5)document.querySelectorAll('.otp-input')[idx+1].focus();
+}
+function otpKey(e,idx){
+  if(e.key==='Backspace'&&!e.target.value&&idx>0){
+    document.querySelectorAll('.otp-input')[idx-1].focus();
+  }
+  if(e.key==='Enter')verify2FA();
+}
+
+function verify2FA(){
+  const code=Array.from(document.querySelectorAll('.otp-input')).map(i=>i.value).join('');
+  if(code===current2FACode){
+    currentUser=loginAttemptUser;
+    sessionStorage.setItem('csa_user',JSON.stringify(currentUser));
+    document.getElementById('twofa-modal').classList.remove('show');
+    updateNavAuth();
+    showToast(`Welcome, ${currentUser.name}! 2FA verified.`,'success');
+    addLog(`AUTH: ${currentUser.email} logged in successfully`);
+    navigate('dashboard');
+  } else {
+    showToast('Invalid OTP code. Try again.','error');
+    document.querySelectorAll('.otp-input').forEach(i=>i.value='');
+    document.querySelectorAll('.otp-input')[0].focus();
+  }
+}
+
+// ===== REGISTER =====
+function handleRegister(){
+  const fname=document.getElementById('reg-fname').value.trim();
+  const lname=document.getElementById('reg-lname').value.trim();
+  const email=document.getElementById('reg-email').value.trim().toLowerCase();
+  const track=document.getElementById('reg-track').value;
+  const pass=document.getElementById('reg-pass').value;
+  const pass2=document.getElementById('reg-pass2').value;
+  const agree=document.getElementById('reg-agree').checked;
+  if(!fname||!lname||!email||!track||!pass||!pass2){showToast('All fields are required','error');return;}
+  if(!email.includes('@')){showToast('Invalid email address','error');return;}
+  if(pass.length<8){showToast('Password must be at least 8 characters','error');return;}
+  if(pass!==pass2){showToast('Passwords do not match','error');return;}
+  if(!agree){showToast('Please agree to terms','error');return;}
+  if(users.some(u=>u.email.toLowerCase()===email)){showToast('Email already registered','error');return;}
+  const newUser={id:'USR'+Date.now(),email,password:pass,name:`${fname} ${lname}`,role:'student',joined:new Date().toISOString(),track};
+  users.push(newUser);
+  localStorage.setItem('csa_users',JSON.stringify(users));
+  showToast('Account created! Please login.','success');
+  addLog(`REGISTER: New student ${email} enrolled`);
+  navigate('login');
+}
+
+function checkPassStrength(p){
+  const fill=document.getElementById('pass-fill'),label=document.getElementById('pass-label');
+  if(!fill)return;
+  let score=0;
+  if(p.length>=8)score++;if(p.length>=12)score++;
+  if(/[A-Z]/.test(p))score++;if(/[0-9]/.test(p))score++;if(/[^A-Za-z0-9]/.test(p))score++;
+  const levels=[{w:'10%',bg:'var(--red)',t:'VERY WEAK'},{w:'25%',bg:'var(--red)',t:'WEAK'},{w:'50%',bg:'var(--orange)',t:'MODERATE'},{w:'75%',bg:'var(--blue)',t:'STRONG'},{w:'100%',bg:'var(--green)',t:'VERY STRONG'}];
+  const l=levels[Math.min(score,4)];
+  fill.style.width=l.w;fill.style.background=l.bg;label.textContent=l.t;label.style.color=l.bg;
+}
+
+function togglePass(id,btn){
+  const inp=document.getElementById(id);
+  inp.type=inp.type==='password'?'text':'password';
+  btn.textContent=inp.type==='password'?'👁':'🙈';
+}
+
+// ===== AUTH STATE =====
+function checkAuth(){
+  const saved=sessionStorage.getItem('csa_user');
+  if(saved){currentUser=JSON.parse(saved);updateNavAuth();}
+}
+
+function updateNavAuth(){
+  const loggedIn=!!currentUser;
+  document.getElementById('nav-login-btn').classList.toggle('hidden',loggedIn);
+  document.getElementById('nav-register-btn').classList.toggle('hidden',loggedIn);
+  document.getElementById('nav-dashboard-btn').classList.toggle('hidden',!loggedIn);
+  document.getElementById('nav-logout-btn').classList.toggle('hidden',!loggedIn);
+}
+
+function logout(){
+  currentUser=null;
+  sessionStorage.removeItem('csa_user');
+  updateNavAuth();
+  showToast('Logged out successfully','info');
+  addLog(`AUTH: User logged out`);
+  navigate('home');
+}
+
+// ===== DASHBOARD =====
+function initDashboard(){
+  if(!currentUser){navigate('login');return;}
+  document.getElementById('dash-username').textContent=currentUser.name;
+  document.getElementById('dash-user-display').textContent=currentUser.name;
+  document.getElementById('dash-user-role').textContent=currentUser.role==='admin'?'ADMIN — GOD MODE':'STUDENT AGENT';
+  document.getElementById('dash-avatar').textContent=currentUser.name[0].toUpperCase();
+  document.getElementById('admin-sidebar').style.display=currentUser.role==='admin'?'block':'none';
+  initUserActivity();initMyCourses();initAssignments();initCertsList();initProgress();
+  if(currentUser.role==='admin'){initAdminPanel();}
+  // cert count
+  const userCerts=MY_CERTS.length+generatedCerts.filter(c=>c.issuedTo===currentUser.email).length;
+  document.getElementById('ds-certs').textContent=userCerts;
+}
+
+function showDashPanel(panel,el){
+  document.querySelectorAll('.dash-panel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('dash-'+panel).classList.remove('hidden');
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  if(el)el.classList.add('active');
+  if(panel==='admin')initAdminPanel();
+  if(panel==='users')initUserMgmt();
+  if(panel==='logs')initLogs();
+}
+
+function initUserActivity(){
+  const acts=[
+    {text:'Completed Lab: XSS Injection Attack',time:'2 hours ago'},
+    {text:'Enrolled in Cloud Security Architect',time:'1 day ago'},
+    {text:'Downloaded Ethical Hacking Syllabus',time:'2 days ago'},
+    {text:'Submitted Assignment: Module 4',time:'3 days ago'},
+    {text:'Certificate issued: Python for Hackers',time:'1 week ago'},
+  ];
+  document.getElementById('user-activity').innerHTML=acts.map(a=>`<div class="activity-item"><div class="activity-dot"></div><div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div></div>`).join('');
+}
+
+function initMyCourses(){
+  const list=document.getElementById('my-courses-list');if(!list)return;
+  const enrolled=[
+    {title:'Ethical Hacking Pro',progress:72,status:'In Progress',next:'Buffer Overflow Attacks'},
+    {title:'OSINT Mastery',progress:45,status:'In Progress',next:'Maltego Advanced'},
+    {title:'Python for Hackers',progress:100,status:'Completed',next:'—'},
+    {title:'Digital Forensics',progress:30,status:'In Progress',next:'Memory Analysis with Volatility'},
+  ];
+  list.innerHTML=enrolled.map(c=>`<div style="background:var(--surface2);border:1px solid var(--border);padding:1.25rem;margin-bottom:.75rem">
+    <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
+      <span style="font-family:var(--font-head);font-weight:600;font-size:.95rem">${c.title}</span>
+      <span style="font-family:var(--font-mono);font-size:.62rem;color:${c.status==='Completed'?'var(--green)':'var(--blue)'};border:1px solid ${c.status==='Completed'?'var(--green)':'var(--blue)'};padding:.15rem .5rem">${c.status.toUpperCase()}</span>
+    </div>
+    <div class="progress-item"><div class="progress-item-header"><span class="progress-item-name">Progress</span><span class="progress-item-pct">${c.progress}%</span></div><div class="progress-bar"><div class="progress-fill" style="width:${c.progress}%"></div></div></div>
+    <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--text3);margin-top:.4rem">Next: ${c.next}</div>
+  </div>`).join('');
+}
+
+function initAssignments(){
+  const list=document.getElementById('assignments-list');if(!list)return;
+  list.innerHTML=ASSIGNMENTS.map(a=>`<div class="assign-card ${a.status}">
+    <div class="assign-title">${a.title}</div>
+    <div class="assign-meta">${a.course} · Due: ${a.due}</div>
+    <div class="assign-status ${a.status}">${a.status.toUpperCase()}</div>
+    ${a.status==='pending'?`<button class="submit-btn" style="width:auto;padding:.3rem 1rem;margin-top:.6rem;font-size:.65rem" onclick="submitAssignment('${a.title}',this)">⟶ SUBMIT</button>`:''}
+  </div>`).join('');
+}
+
+function submitAssignment(title,btn){
+  btn.textContent='✓ SUBMITTED';
+  btn.style.background='var(--green)';btn.style.color='#000';
+  btn.parentElement.classList.replace('pending','submitted');
+  btn.parentElement.querySelector('.assign-status').textContent='SUBMITTED';
+  btn.parentElement.querySelector('.assign-status').className='assign-status submitted';
+  btn.remove();
+  showToast(`Assignment "${title}" submitted!`,'success');
+  addLog(`SUBMIT: Assignment "${title}" submitted by ${currentUser.email}`);
+}
+
+function initCertsList(){
+  const list=document.getElementById('certs-list');if(!list)return;
+  const allCerts=[...MY_CERTS,...generatedCerts.filter(c=>c.issuedTo===currentUser.email)];
+  if(!allCerts.length){list.innerHTML='<div style="font-family:var(--font-mono);color:var(--text3)">No certificates yet. Complete courses to earn certificates.</div>';return;}
+  list.innerHTML=allCerts.map(c=>`<div style="background:var(--surface2);border:1px solid var(--border);padding:1.25rem;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="font-family:var(--font-head);font-weight:600">${c.course}</div>
+      <div style="font-family:var(--font-mono);font-size:.65rem;color:var(--green);margin-top:.25rem">${c.id}</div>
+      <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3);margin-top:.2rem">${c.date} · Grade: ${c.grade}</div>
+    </div>
+    <button class="verify-btn" onclick="navigate('verify');setTimeout(()=>{document.getElementById('verify-input').value='${c.id}';verifyID()},300)">VERIFY</button>
+  </div>`).join('');
+}
+
+function initProgress(){
+  const cont=document.getElementById('progress-analytics');if(!cont)return;
+  cont.innerHTML=`<div class="progress-card">
+    <div class="progress-title">Detailed Analytics</div>
+    ${[{n:'Ethical Hacking Pro',p:72},{n:'OSINT Mastery',p:45},{n:'Python for Hackers',p:100},{n:'Digital Forensics',p:30},{n:'Cloud Security',p:15}].map(i=>`<div class="progress-item"><div class="progress-item-header"><span class="progress-item-name">${i.n}</span><span class="progress-item-pct">${i.p}%</span></div><div class="progress-bar"><div class="progress-fill" style="width:${i.p}%"></div></div></div>`).join('')}
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:2px;margin-bottom:.75rem">// SKILL MATRIX</div>
+      ${[{s:'Penetration Testing',v:72},{s:'OSINT Research',v:55},{s:'Python Scripting',v:90},{s:'Digital Forensics',v:30},{s:'Cloud Architecture',v:15},{s:'Cyber Law',v:60}].map(s=>`<div style="display:flex;align-items:center;gap:1rem;margin-bottom:.5rem"><span style="font-family:var(--font-mono);font-size:.65rem;color:var(--text2);width:160px">${s.s}</span><div style="flex:1;height:6px;background:var(--surface4);border-radius:3px;overflow:hidden"><div style="height:100%;width:${s.v}%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:3px"></div></div><span style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3);width:35px;text-align:right">${s.v}%</span></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function initAdminPanel(){
+  const students=users.filter(u=>u.role==='student').length;
+  document.getElementById('admin-total-students').textContent=students;
+  document.getElementById('admin-proposals').textContent=proposals.length;
+  document.getElementById('admin-certs-count').textContent=generatedCerts.length;
+  const table=document.getElementById('admin-users-table');if(!table)return;
+  table.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border);padding:1rem;margin-top:1rem">
+    <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:3px;margin-bottom:.75rem">// REGISTERED USERS</div>
+    <table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Track</th><th>Joined</th></tr></thead>
+    <tbody>${users.map(u=>`<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td><span class="badge-role ${u.role}">${u.role.toUpperCase()}</span></td><td>${u.track||'—'}</td><td>${new Date(u.joined).toLocaleDateString()}</td></tr>`).join('')}</tbody></table>
+  </div>`;
+}
+
+function initUserMgmt(){
+  const cont=document.getElementById('user-mgmt-table');if(!cont)return;
+  cont.innerHTML=`<div style="background:var(--surface2);border:1px solid var(--border);padding:1rem">
+    <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3);letter-spacing:3px;margin-bottom:.75rem">// USER MANAGEMENT — RBAC ENABLED</div>
+    <table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+    <tbody>${users.map(u=>`<tr><td>${u.name}</td><td>${u.email}</td><td><span class="badge-role ${u.role}">${u.role.toUpperCase()}</span></td><td style="display:flex;gap:.4rem">
+      <button style="font-family:var(--font-mono);font-size:.58rem;padding:.2rem .5rem;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:none;transition:var(--transition)" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" onclick="promoteUser('${u.id}',this)">TOGGLE ROLE</button>
+      <button style="font-family:var(--font-mono);font-size:.58rem;padding:.2rem .5rem;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:none;transition:var(--transition)" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" onclick="removeUser('${u.id}')">REMOVE</button>
+    </td></tr>`).join('')}</tbody></table>
+  </div>`;
+}
+
+function promoteUser(id,btn){
+  const u=users.find(x=>x.id===id);if(!u)return;
+  u.role=u.role==='admin'?'student':'admin';
+  localStorage.setItem('csa_users',JSON.stringify(users));
+  showToast(`${u.name} role changed to ${u.role.toUpperCase()}`,'success');
+  addLog(`ADMIN: ${currentUser.email} changed role of ${u.email} to ${u.role}`);
+  initUserMgmt();
+}
+
+function removeUser(id){
+  if(users.find(x=>x.id===id)?.email===currentUser.email){showToast('Cannot remove yourself','error');return;}
+  users=users.filter(x=>x.id!==id);
+  localStorage.setItem('csa_users',JSON.stringify(users));
+  showToast('User removed','info');
+  initUserMgmt();initAdminPanel();
+}
+
+function initLogs(){
+  const cont=document.getElementById('activity-logs-container');if(!cont)return;
+  cont.innerHTML=logs.length?logs.map(l=>`<div style="border-bottom:1px solid var(--border);padding:.3rem 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l}</div>`).join(''):'<div style="color:var(--text3)">No logs yet.</div>';
+  cont.scrollTop=0;
+}
+
+// ===== CERT GENERATOR =====
+function generateCert(){
+  if(!currentUser||currentUser.role!=='admin'){showToast('Admin only','error');return;}
+  const name=document.getElementById('cg-name').value.trim();
+  const course=document.getElementById('cg-course').value;
+  const grade=document.getElementById('cg-grade').value;
+  if(!name){showToast('Enter student name','error');return;}
+  const id='CSA-'+new Date().getFullYear()+'-'+String(Math.floor(100000+Math.random()*900000));
+  const date=new Date().toISOString().split('T')[0];
+  const cert={id,name,course,grade,date,issuedBy:currentUser.name,issuedTo:''};
+  generatedCerts.push(cert);
+  localStorage.setItem('csa_certs',JSON.stringify(generatedCerts));
+  // Add to verifydb in session
+  VERIFY_DB[id]={type:'certificate',name,course,date,grade,status:'valid',issuer:currentUser.name};
+  const preview=document.getElementById('cert-preview');
+  preview.style.display='block';
+  preview.innerHTML=`<div class="cert-title">CERTIFICATE OF COMPLETION</div>
+    <div class="cert-body">
+      <div style="font-size:.65rem;color:var(--text3);letter-spacing:3px;margin-bottom:.5rem">THIS IS TO CERTIFY THAT</div>
+      <div style="font-family:var(--font-head);font-size:1.6rem;color:var(--text1);margin:.5rem 0">${name}</div>
+      <div style="font-size:.65rem;color:var(--text3);letter-spacing:2px;margin-bottom:.5rem">HAS SUCCESSFULLY COMPLETED</div>
+      <div style="font-size:1rem;color:var(--blue);font-weight:700;margin:.3rem 0">${course}</div>
+      <div>with grade: <span style="color:var(--gold)">${grade}</span></div>
+      <div style="margin-top:.5rem;font-size:.65rem;color:var(--text3)">Issued on ${date} by ${currentUser.name}</div>
+    </div>
+    <div class="cert-id">${id}</div>
+    <div class="cert-seal">🔐</div>
+    <div style="font-family:var(--font-mono);font-size:.6rem;color:var(--text3);margin-top:.5rem">Verify at: cyberschool.ac/verify</div>`;
+  showToast(`Certificate generated: ${id}`,'success');
+  addLog(`CERTGEN: Certificate ${id} generated for ${name} by ${currentUser.email}`);
+  document.getElementById('admin-certs-count').textContent=generatedCerts.length;
+}
+
+// ===== CLI SEARCH =====
+function handleSearch(q){
+  const search=document.getElementById('cli-search'),results=document.getElementById('cli-results');
+  if(!q.trim()){search.classList.remove('open');return;}
+  const hits=COURSES.filter(c=>c.title.toLowerCase().includes(q.toLowerCase())||c.tags.some(t=>t.toLowerCase().includes(q.toLowerCase())));
+  if(!hits.length){search.classList.remove('open');return;}
+  results.innerHTML=hits.slice(0,6).map(c=>`<div class="cli-result-item" onclick="navigate('courses');setTimeout(()=>filterDept({classList:{add:()=>{},remove:()=>{},toggle:()=>{}}},document.querySelector('.dept-tab.active')?.dataset?.dept||'all'),300);document.getElementById('cli-search').classList.remove('open');document.getElementById('cli-input').value=''">
+    <span style="color:var(--green)">${c.title}</span> <span style="color:var(--text3);font-size:.6rem">${c.price}</span>
+  </div>`).join('');
+  search.classList.add('open');
+}
+
+function handleSearchKey(e){
+  if(e.key==='Escape'){document.getElementById('cli-search').classList.remove('open');document.getElementById('cli-input').value='';}
+  if(e.key==='Enter'){navigate('courses');document.getElementById('cli-search').classList.remove('open');document.getElementById('cli-input').value='';}
+}
+
+document.addEventListener('click',e=>{
+  if(!document.getElementById('cli-search').contains(e.target))document.getElementById('cli-search').classList.remove('open');
+});
+
+// ===== BOOT =====
+window.addEventListener('load',()=>{
+  setTimeout(runIntro,100);
+});
+</script>
+</body>
+</html>
