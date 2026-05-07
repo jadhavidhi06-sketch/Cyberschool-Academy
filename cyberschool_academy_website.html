@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Montserrat:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --obsidian:#0a0a0a;
+  --green:#00ff41;
+  --blue:#00d4ff;
+  --green-dim:rgba(0,255,65,0.15);
+  --blue-dim:rgba(0,212,255,0.15);
+  --glass:rgba(255,255,255,0.03);
+  --glass-border:rgba(0,255,65,0.15);
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Montserrat',sans-serif;
+}
+body{background:var(--obsidian);color:#e0e0e0;font-family:var(--sans);overflow-x:hidden;cursor:default}
+
+/* ── MATRIX CANVAS ── */
+#matrix-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.07;pointer-events:none}
+
+/* ── NEURAL MAP ── */
+#neural-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:all;cursor:grab}
+#neural-canvas:active{cursor:grabbing}
+
+/* ── SCROLLABLE CONTENT ── */
+.site{position:relative;z-index:2}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:0 24px}
+.hero-neural{position:absolute;inset:0;z-index:1}
+.hero-content{position:relative;z-index:3;text-align:center;max-width:820px}
+
+/* Vault ring animation */
+.vault-ring{position:absolute;inset:0;z-index:2;pointer-events:none}
+.ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid var(--green);animation:ringPulse 4s ease-out infinite;opacity:0}
+.ring:nth-child(1){width:400px;height:400px;animation-delay:0s}
+.ring:nth-child(2){width:600px;height:600px;animation-delay:0.8s}
+.ring:nth-child(3){width:800px;height:800px;animation-delay:1.6s}
+@keyframes ringPulse{0%{opacity:0;transform:translate(-50%,-50%) scale(0.6)}40%{opacity:0.3}100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+
+.logo-badge{display:inline-flex;align-items:center;gap:10px;background:var(--green-dim);border:1px solid var(--glass-border);padding:8px 18px;border-radius:4px;margin-bottom:24px;animation:fadeInDown 1s ease 0.5s both}
+.logo-badge span{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:3px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+.hero h1{font-size:clamp(32px,6vw,72px);font-weight:900;line-height:1.05;letter-spacing:-2px;animation:glitchIn 1.5s ease 0.8s both}
+.hero h1 em{font-style:normal;color:var(--green);text-shadow:0 0 20px rgba(0,255,65,0.4)}
+.hero h1 span{color:var(--blue);text-shadow:0 0 20px rgba(0,212,255,0.4)}
+
+@keyframes glitchIn{0%{opacity:0;transform:translateY(30px) skewX(-5deg)}50%{opacity:0.8;transform:translateY(0) skewX(2deg)}70%{transform:skewX(-1deg)}100%{opacity:1;transform:none}}
+@keyframes fadeInDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:none}}
+
+.hero-sub{font-family:var(--mono);font-size:14px;color:#888;margin-top:20px;animation:fadeInDown 1s ease 1.2s both;letter-spacing:1px}
+.hero-sub strong{color:var(--blue)}
+
+/* CLI search */
+.cli-search{margin:36px auto 0;max-width:500px;background:rgba(0,0,0,0.6);border:1px solid var(--green);border-radius:4px;display:flex;align-items:center;padding:12px 16px;gap:10px;animation:fadeInDown 1s ease 1.5s both}
+.cli-prompt{font-family:var(--mono);color:var(--green);font-size:14px;white-space:nowrap}
+.cli-input{flex:1;background:none;border:none;outline:none;font-family:var(--mono);font-size:14px;color:#e0e0e0;caret-color:var(--green)}
+.cli-input::placeholder{color:#444}
+
+/* CTA buttons */
+.hero-cta{margin-top:40px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeInDown 1s ease 1.8s both}
+.btn-primary{background:var(--green);color:#000;padding:12px 28px;font-family:var(--mono);font-size:13px;font-weight:700;border:none;border-radius:3px;cursor:pointer;letter-spacing:1px;transition:all 0.2s;text-transform:uppercase}
+.btn-primary:hover{background:#00ff41cc;box-shadow:0 0 20px rgba(0,255,65,0.4);transform:translateY(-1px)}
+.btn-ghost{background:none;color:var(--blue);padding:12px 28px;font-family:var(--mono);font-size:13px;border:1px solid var(--blue);border-radius:3px;cursor:pointer;letter-spacing:1px;transition:all 0.2s;text-transform:uppercase}
+.btn-ghost:hover{background:var(--blue-dim);box-shadow:0 0 20px rgba(0,212,255,0.3);transform:translateY(-1px)}
+
+/* Live ticker */
+.activity-ticker{position:absolute;bottom:24px;left:0;right:0;z-index:3;display:flex;justify-content:center}
+.ticker-item{font-family:var(--mono);font-size:11px;color:#555;display:flex;align-items:center;gap:8px}
+.ticker-item.active{color:var(--green)}
+.ticker-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1s infinite}
+.ticker-sep{margin:0 12px;color:#222}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,255,65,0.1);padding:0 clamp(16px,4vw,48px)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:56px;max-width:1200px;margin:0 auto}
+.nav-logo{font-family:var(--mono);font-size:15px;color:var(--green);font-weight:700;letter-spacing:2px}
+.nav-logo sup{font-size:8px;color:var(--blue)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-family:var(--mono);font-size:11px;color:#666;text-decoration:none;letter-spacing:1px;text-transform:uppercase;transition:color 0.2s;cursor:pointer}
+.nav-links a:hover{color:var(--green)}
+.nav-status{font-family:var(--mono);font-size:10px;color:var(--green);display:flex;align-items:center;gap:6px}
+
+/* ── SECTIONS ── */
+section{max-width:1200px;margin:0 auto;padding:100px clamp(16px,4vw,48px)}
+.section-label{font-family:var(--mono);font-size:11px;color:var(--green);letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-label::before{content:'//';color:#333}
+h2.section-title{font-size:clamp(24px,4vw,48px);font-weight:900;letter-spacing:-1px;line-height:1.1;margin-bottom:48px}
+h2.section-title em{font-style:normal;color:var(--green)}
+
+/* ── NEURAL MAP SECTION ── */
+.neural-section{position:relative;background:linear-gradient(180deg,rgba(0,255,65,0.02) 0%,transparent 100%);border-top:1px solid rgba(0,255,65,0.08);border-bottom:1px solid rgba(0,255,65,0.08);padding:0;overflow:hidden}
+.neural-wrap{height:420px;position:relative}
+.neural-ui{position:absolute;top:24px;right:24px;z-index:10;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.neural-ui-card{background:rgba(0,0,0,0.7);border:1px solid rgba(0,255,65,0.2);padding:8px 14px;border-radius:3px;font-family:var(--mono);font-size:10px;display:flex;align-items:center;gap:8px}
+.neural-ui-card.green{border-color:rgba(0,255,65,0.4);color:var(--green)}
+.neural-ui-card.blue{border-color:rgba(0,212,255,0.4);color:var(--blue)}
+.node-tooltip{position:absolute;background:rgba(0,0,0,0.9);border:1px solid var(--green);padding:8px 12px;border-radius:3px;font-family:var(--mono);font-size:11px;color:var(--green);pointer-events:none;display:none;white-space:nowrap;z-index:20}
+
+/* ── COURSES GRID ── */
+.courses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:rgba(0,255,65,0.08);border:1px solid rgba(0,255,65,0.08)}
+.course-card{background:var(--obsidian);padding:32px;position:relative;overflow:hidden;cursor:pointer;transition:background 0.3s}
+.course-card::before{content:'';position:absolute;top:-100%;left:0;right:0;height:2px;background:var(--green);transition:top 0.4s ease;box-shadow:0 0 20px var(--green)}
+.course-card:hover::before{top:0}
+.course-card:hover{background:rgba(0,255,65,0.03)}
+.scan-line{position:absolute;top:-100%;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);transition:none}
+.course-card:hover .scan-line{animation:scan 0.6s ease forwards}
+@keyframes scan{0%{top:0;opacity:1}100%{top:100%;opacity:0}}
+.course-dept{font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:3px;margin-bottom:12px}
+.course-title{font-size:18px;font-weight:700;margin-bottom:10px;line-height:1.3}
+.course-meta{display:flex;align-items:center;justify-content:space-between;margin-top:20px}
+.seats{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:2px;letter-spacing:1px}
+.seats.hot{background:rgba(255,60,60,0.15);color:#ff6b6b;border:1px solid rgba(255,60,60,0.3)}
+.seats.warm{background:rgba(255,160,0,0.15);color:#ffaa00;border:1px solid rgba(255,160,0,0.3)}
+.seats.ok{background:var(--green-dim);color:var(--green);border:1px solid var(--glass-border)}
+.course-id{font-family:var(--mono);font-size:10px;color:#333}
+.course-icon{font-size:28px;margin-bottom:16px}
+
+/* ── VERIFICATION ENGINE ── */
+.verify-panel{background:rgba(0,0,0,0.4);border:1px solid rgba(0,255,65,0.2);border-radius:4px;padding:36px;max-width:640px;margin:0 auto}
+.verify-tabs{display:flex;gap:0;margin-bottom:28px;border:1px solid rgba(0,255,65,0.2);border-radius:3px;overflow:hidden}
+.vtab{flex:1;padding:10px;font-family:var(--mono);font-size:11px;text-align:center;cursor:pointer;color:#555;background:none;border:none;transition:all 0.2s;letter-spacing:1px}
+.vtab.active{background:var(--green);color:#000;font-weight:700}
+.verify-input-row{display:flex;gap:10px;margin-bottom:20px}
+.verify-input{flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,65,0.2);color:#e0e0e0;padding:12px 16px;font-family:var(--mono);font-size:13px;border-radius:3px;outline:none;transition:border-color 0.2s}
+.verify-input:focus{border-color:var(--green)}
+.verify-btn{background:var(--green);color:#000;border:none;padding:12px 20px;font-family:var(--mono);font-size:13px;font-weight:700;cursor:pointer;border-radius:3px;letter-spacing:1px;transition:all 0.2s;white-space:nowrap}
+.verify-btn:hover{box-shadow:0 0 15px rgba(0,255,65,0.4)}
+.verify-result{background:rgba(0,0,0,0.5);border-radius:3px;padding:20px;font-family:var(--mono);font-size:12px;border-left:3px solid var(--green);display:none}
+.verify-result.show{display:block;animation:fadeInDown 0.4s ease}
+.clearance-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:12px}
+.clearance-valid{background:rgba(0,255,65,0.15);color:var(--green);border:1px solid var(--green)}
+.clearance-fake{background:rgba(255,60,60,0.15);color:#ff4444;border:1px solid #ff4444}
+.clearance-expired{background:rgba(255,160,0,0.15);color:#ffaa00;border:1px solid #ffaa00}
+.verify-detail{color:#888;line-height:2}
+.verify-detail strong{color:#ccc}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid rgba(0,255,65,0.1);background:rgba(0,255,65,0.02)}
+.stat{padding:28px 24px;border-right:1px solid rgba(0,255,65,0.1);text-align:center}
+.stat:last-child{border-right:none}
+.stat-num{font-size:clamp(28px,4vw,48px);font-weight:900;color:var(--green);font-family:var(--mono);display:block;line-height:1}
+.stat-label{font-size:11px;color:#555;margin-top:8px;font-family:var(--mono);letter-spacing:2px}
+
+/* ── DEPARTMENTS ── */
+.dept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.dept-card{border:1px solid rgba(0,212,255,0.15);padding:24px;border-radius:3px;background:rgba(0,212,255,0.03);transition:all 0.3s;cursor:pointer}
+.dept-card:hover{border-color:var(--blue);background:rgba(0,212,255,0.07);transform:translateY(-2px)}
+.dept-icon{width:40px;height:40px;border:1px solid rgba(0,212,255,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:16px}
+.dept-name{font-size:15px;font-weight:700;margin-bottom:6px}
+.dept-sub{font-family:var(--mono);font-size:11px;color:#555}
+
+/* ── B2B PORTAL ── */
+.b2b-form{background:rgba(0,0,0,0.3);border:1px solid rgba(0,212,255,0.15);padding:36px;border-radius:4px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field label{font-family:var(--mono);font-size:11px;color:var(--blue);letter-spacing:1px}
+.form-field input,.form-field select,.form-field textarea{background:rgba(0,0,0,0.5);border:1px solid rgba(0,212,255,0.2);color:#e0e0e0;padding:10px 14px;font-family:var(--mono);font-size:12px;border-radius:3px;outline:none;transition:border-color 0.2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--blue)}
+.form-field select option{background:#111}
+.upload-zone{border:1px dashed rgba(0,212,255,0.3);padding:24px;text-align:center;border-radius:3px;font-family:var(--mono);font-size:12px;color:#555;cursor:pointer;transition:all 0.2s;margin-bottom:16px}
+.upload-zone:hover{border-color:var(--blue);color:var(--blue);background:rgba(0,212,255,0.03)}
+.status-tracker{display:flex;align-items:center;gap:0;margin-top:28px;background:rgba(0,0,0,0.3);border:1px solid rgba(0,212,255,0.1);padding:16px 20px;border-radius:3px}
+.status-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;color:#333;text-align:center}
+.status-step.done{color:var(--green)}
+.status-step.active{color:var(--blue)}
+.status-dot{width:10px;height:10px;border-radius:50%;border:1px solid currentColor;background:transparent;transition:background 0.3s}
+.status-step.done .status-dot{background:var(--green);border-color:var(--green)}
+.status-step.active .status-dot{background:var(--blue);border-color:var(--blue);animation:blink 1s infinite}
+.status-line{flex:1;height:1px;background:rgba(0,212,255,0.15)}
+
+/* ── PLACEMENT HUB ── */
+.partner-logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.05);margin-bottom:40px}
+.partner-logo{background:var(--obsidian);padding:24px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:#444;transition:all 0.3s;cursor:pointer;letter-spacing:2px;min-height:70px}
+.partner-logo:hover{color:var(--green);background:rgba(0,255,65,0.03)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid rgba(0,255,65,0.1);padding:40px clamp(16px,4vw,48px)}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-copy{font-family:var(--mono);font-size:11px;color:#333}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-family:var(--mono);font-size:10px;color:#333;text-decoration:none;letter-spacing:1px;cursor:pointer;transition:color 0.2s}
+.footer-links a:hover{color:var(--green)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#0a0a0a}
+::-webkit-scrollbar-thumb{background:rgba(0,255,65,0.3);border-radius:2px}
+
+/* responsive */
+@media(max-width:640px){
+  .nav-links{display:none}
+  .stats-bar{grid-template-columns:1fr 1fr}
+  .stat:nth-child(2){border-right:none}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Matrix background canvas -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">CYBERSCHOOL<sup>®</sup></div>
+    <div class="nav-links">
+      <a onclick="scrollTo('#courses')">Courses</a>
+      <a onclick="scrollTo('#verify')">Verify</a>
+      <a onclick="scrollTo('#departments')">Departments</a>
+      <a onclick="scrollTo('#b2b')">Partners</a>
+      <a onclick="scrollTo('#placement')">Placement</a>
+    </div>
+    <div class="nav-status"><div class="logo-dot"></div> SECURE · SSL</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-neural"><canvas id="neural-canvas"></canvas></div>
+  <div class="vault-ring">
+    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+  </div>
+  <div class="hero-content">
+    <div class="logo-badge"><span class="logo-dot"></span><span>CYBERSCHOOL ACADEMY · SINCE 2024</span></div>
+    <h1>Master the<br><em>Art of</em> <span>Cyber Defense</span></h1>
+    <p class="hero-sub">Elite training in <strong>Ethical Hacking · OSINT · Cyber Law</strong></p>
+    <div class="cli-search">
+      <span class="cli-prompt">$&nbsp;</span>
+      <input class="cli-input" placeholder="/search [course_name]" id="cli-input" onkeydown="handleCLI(event)">
+    </div>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="scrollTo('#courses')">ENROLL NOW →</button>
+      <button class="btn-ghost" onclick="scrollTo('#verify')">VERIFY CERT</button>
+    </div>
+  </div>
+  <div class="activity-ticker">
+    <div class="ticker-item active" id="ticker-msg"><span class="ticker-dot"></span><span id="ticker-text">Node 4F2A: Certificate Verified · 3s ago</span></div>
+  </div>
+  <div class="node-tooltip" id="node-tooltip"></div>
+</div>
+
+<!-- NEURAL MAP SECTION -->
+<div class="neural-section" id="neural">
+  <div class="neural-wrap">
+    <canvas id="neural-map-canvas"></canvas>
+    <div class="neural-ui">
+      <div class="neural-ui-card green"><div class="logo-dot"></div> 247 Active Nodes</div>
+      <div class="neural-ui-card blue"><div class="logo-dot" style="background:var(--blue)"></div> Real-time Activity</div>
+      <div class="neural-ui-card" style="color:#555">Drag · Click nodes</div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div style="max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,48px)">
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-num" data-target="12400">0</span><div class="stat-label">STUDENTS TRAINED</div></div>
+    <div class="stat"><span class="stat-num" data-target="340">0</span><div class="stat-label">CERTIFICATES ISSUED</div></div>
+    <div class="stat"><span class="stat-num" data-target="98">0</span><div class="stat-label">PLACEMENT RATE %</div></div>
+    <div class="stat"><span class="stat-num" data-target="56">0</span><div class="stat-label">PARTNER CORPS</div></div>
+  </div>
+</div>
+
+<!-- COURSES -->
+<section id="courses">
+  <div class="section-label">02 MODULES</div>
+  <h2 class="section-title">Core <em>Training</em> Programs</h2>
+  <div class="courses-grid">
+    <div class="course-card">
+      <div class="scan-line"></div>
+      <div class="course-dept">DEPT-01 · ETHICAL HACKING</div>
+      <div class="course-icon">⚔️</div>
+      <div class="course-title">Certified Ethical Hacker (CEH)</div>
+      <div style="font-size:13px;color:#666;line-height:1.6">Penetration testing, vulnerability assessment, exploit development, red team operations.</div>
+      <div class="course-meta">
+        <span class="seats hot">🔥 3 SEATS LEFT</span>
+        <span class="course-id">CSA-CEH-2024</span>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="scan-line"></div>
+      <div class="course-dept">DEPT-02 · OSINT</div>
+      <div class="course-icon">🔍</div>
+      <div class="course-title">Open Source Intelligence Mastery</div>
+      <div style="font-size:13px;color:#666;line-height:1.6">Digital footprinting, dark web analysis, geolocation, advanced OSINT frameworks.</div>
+      <div class="course-meta">
+        <span class="seats warm">⚠ 8 SEATS</span>
+        <span class="course-id">CSA-OSI-2024</span>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="scan-line"></div>
+      <div class="course-dept">DEPT-03 · CYBER LAW</div>
+      <div class="course-icon">⚖️</div>
+      <div class="course-title">Cyber Law & Digital Forensics</div>
+      <div style="font-size:13px;color:#666;line-height:1.6">IT Act 2000, GDPR compliance, digital evidence handling, cyber crime investigation.</div>
+      <div class="course-meta">
+        <span class="seats ok">✓ 15 SEATS</span>
+        <span class="course-id">CSA-CLF-2024</span>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="scan-line"></div>
+      <div class="course-dept">DEPT-04 · SOC OPERATIONS</div>
+      <div class="course-icon">🛡️</div>
+      <div class="course-title">SOC Analyst — Tier 1 & 2</div>
+      <div style="font-size:13px;color:#666;line-height:1.6">SIEM platforms, threat hunting, incident response, log analysis with live infrastructure.</div>
+      <div class="course-meta">
+        <span class="seats hot">🔥 2 SEATS LEFT</span>
+        <span class="course-id">CSA-SOC-2024</span>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="scan-line"></div>
+      <div class="course-dept">DEPT-05 · CLOUD SECURITY</div>
+      <div class="course-icon">☁️</div>
+      <div class="course-title">AWS & Azure Security Specialist</div>
+      <div style="font-size:13px;color:#666;line-height:1.6">Cloud misconfigurations, IAM hardening, serverless attack surfaces, DevSecOps pipelines.</div>
+      <div class="course-meta">
+        <span class="seats ok">✓ 20 SEATS</span>
+        <span class="course-id">CSA-CLD-2024</span>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="scan-line"></div>
+      <div class="course-dept">DEPT-06 · MALWARE ANALYSIS</div>
+      <div class="course-icon">🦠</div>
+      <div class="course-title">Advanced Malware Reverse Engineering</div>
+      <div style="font-size:13px;color:#666;line-height:1.6">Static & dynamic analysis, sandbox environments, disassembly, APT threat intelligence.</div>
+      <div class="course-meta">
+        <span class="seats warm">⚠ 6 SEATS</span>
+        <span class="course-id">CSA-MAL-2024</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VERIFICATION ENGINE -->
+<section id="verify" style="background:linear-gradient(180deg,transparent,rgba(0,255,65,0.03),transparent)">
+  <div class="section-label">03 VERIFY</div>
+  <h2 class="section-title" style="text-align:center">Security <em>Clearance</em> System</h2>
+  <div class="verify-panel">
+    <div class="verify-tabs">
+      <button class="vtab active" onclick="setVTab(this,'cert')">Certificate</button>
+      <button class="vtab" onclick="setVTab(this,'partner')">Partner</button>
+      <button class="vtab" onclick="setVTab(this,'member')">Team Member</button>
+    </div>
+    <div class="verify-input-row">
+      <input class="verify-input" id="verify-id" placeholder="Enter ID · e.g. CSA-2024-0042F" />
+      <button class="verify-btn" onclick="runVerify()">VERIFY</button>
+    </div>
+    <div style="text-align:center;margin-bottom:20px">
+      <button onclick="demoVerify('valid')" style="background:none;border:1px solid #222;color:#555;padding:6px 14px;font-family:var(--mono);font-size:11px;border-radius:3px;cursor:pointer;margin:0 4px;transition:all 0.2s" onmouseover="this.style.borderColor='#00ff41';this.style.color='#00ff41'" onmouseout="this.style.borderColor='#222';this.style.color='#555'">Demo: Valid</button>
+      <button onclick="demoVerify('expired')" style="background:none;border:1px solid #222;color:#555;padding:6px 14px;font-family:var(--mono);font-size:11px;border-radius:3px;cursor:pointer;margin:0 4px;transition:all 0.2s" onmouseover="this.style.borderColor='#ffaa00';this.style.color='#ffaa00'" onmouseout="this.style.borderColor='#222';this.style.color='#555'">Demo: Expired</button>
+      <button onclick="demoVerify('fake')" style="background:none;border:1px solid #222;color:#555;padding:6px 14px;font-family:var(--mono);font-size:11px;border-radius:3px;cursor:pointer;margin:0 4px;transition:all 0.2s" onmouseover="this.style.borderColor='#ff4444';this.style.color='#ff4444'" onmouseout="this.style.borderColor='#222';this.style.color='#555'">Demo: Fake</button>
+    </div>
+    <div class="verify-result" id="verify-result"></div>
+  </div>
+</section>
+
+<!-- DEPARTMENTS -->
+<section id="departments">
+  <div class="section-label">04 STRUCTURE</div>
+  <h2 class="section-title">Academy <em>Departments</em></h2>
+  <div class="dept-grid">
+    <div class="dept-card">
+      <div class="dept-icon">⚔️</div>
+      <div class="dept-name">Red Team Operations</div>
+      <div class="dept-sub">Offensive security · Exploit dev · APT sim</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-icon">🛡️</div>
+      <div class="dept-name">Blue Team Defense</div>
+      <div class="dept-sub">SOC · SIEM · Incident response · Threat intel</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-icon">🔍</div>
+      <div class="dept-name">OSINT Intelligence</div>
+      <div class="dept-sub">Reconnaissance · Dark web · HUMINT · GEOINT</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-icon">⚖️</div>
+      <div class="dept-name">Cyber Law & Policy</div>
+      <div class="dept-sub">Legal compliance · Digital forensics · GDPR</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-icon">🏛️</div>
+      <div class="dept-name">Offline Training Units</div>
+      <div class="dept-sub">Mumbai · Pune · Delhi · Bengaluru · Hyderabad</div>
+    </div>
+    <div class="dept-card">
+      <div class="dept-icon">🎓</div>
+      <div class="dept-name">Research & Dev</div>
+      <div class="dept-sub">0-day research · CVE submissions · Publications</div>
+    </div>
+  </div>
+</section>
+
+<!-- B2B PORTAL -->
+<section id="b2b">
+  <div class="section-label">05 PARTNERS</div>
+  <h2 class="section-title">B2B <em>Collaboration</em> Portal</h2>
+  <div class="b2b-form">
+    <div class="form-grid">
+      <div class="form-field">
+        <label>ORGANIZATION NAME</label>
+        <input placeholder="University / Corporation name">
+      </div>
+      <div class="form-field">
+        <label>ENTITY TYPE</label>
+        <select><option>University</option><option>Corporate</option><option>Government</option><option>NGO</option></select>
+      </div>
+      <div class="form-field">
+        <label>CONTACT EMAIL</label>
+        <input type="email" placeholder="ciso@organization.com">
+      </div>
+      <div class="form-field">
+        <label>PROPOSAL TYPE</label>
+        <select><option>MOU / Partnership</option><option>Bulk Enrollment</option><option>Custom Training</option><option>Research Collab</option></select>
+      </div>
+    </div>
+    <div class="form-field" style="margin-bottom:16px">
+      <label>PROPOSAL SUMMARY</label>
+      <textarea rows="3" placeholder="Describe collaboration goals, expected cohort size, timeline..." style="resize:none"></textarea>
+    </div>
+    <div class="upload-zone" onclick="this.style.borderColor='var(--blue)'" onmouseleave="this.style.borderColor=''">
+      📄 Drag & drop proposal document or <strong style="color:var(--blue)">click to upload</strong><br>
+      <span style="font-size:10px;margin-top:6px;display:block">.PDF · .DOCX · .PPTX · Max 25MB · Encrypted in transit</span>
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center">SUBMIT PROPOSAL →</button>
+    <div class="status-tracker">
+      <div class="status-step done"><div class="status-dot"></div>Draft</div>
+      <div class="status-line"></div>
+      <div class="status-step active"><div class="status-dot"></div>Review</div>
+      <div class="status-line"></div>
+      <div class="status-step"><div class="status-dot"></div>Approval</div>
+      <div class="status-line"></div>
+      <div class="status-step"><div class="status-dot"></div>MOU Sign</div>
+      <div class="status-line"></div>
+      <div class="status-step"><div class="status-dot"></div>Active</div>
+    </div>
+  </div>
+</section>
+
+<!-- PLACEMENT HUB -->
+<section id="placement">
+  <div class="section-label">06 PLACEMENT</div>
+  <h2 class="section-title">Placement & <em>University</em> Hub</h2>
+  <div class="partner-logos">
+    <div class="partner-logo">CISCO</div>
+    <div class="partner-logo">WIPRO</div>
+    <div class="partner-logo">TCS</div>
+    <div class="partner-logo">INFOSYS</div>
+    <div class="partner-logo">HCL</div>
+    <div class="partner-logo">IBM</div>
+    <div class="partner-logo">PALO ALTO</div>
+    <div class="partner-logo">CROWDSTRIKE</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:640px;margin:0 auto">
+    <div style="border:1px solid rgba(0,255,65,0.15);padding:24px;border-radius:3px;background:rgba(0,255,65,0.02)">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:2px;margin-bottom:12px">CORPORATE PATH</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px">Industry Placement</div>
+      <div style="font-size:13px;color:#666">Direct hiring pipeline with 56+ partner corporations. Resume reviews, mock interviews, offer letters.</div>
+    </div>
+    <div style="border:1px solid rgba(0,212,255,0.15);padding:24px;border-radius:3px;background:rgba(0,212,255,0.02)">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:2px;margin-bottom:12px">ACADEMIC PATH</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px">University Degree</div>
+      <div style="font-size:13px;color:#666">Credit transfer programs with 12 partner universities. M.Sc. Cybersecurity, B.Tech CSE pathways.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-copy">© 2024 CYBERSCHOOL ACADEMY · SECURE · RBAC · DDoS PROTECTED · SSL/TLS v1.3</div>
+    <div class="footer-links">
+      <a>Privacy</a><a>Terms</a><a>Admin</a><a>API</a><a>Status</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── MATRIX RAIN ──
+(function(){
+  const c=document.getElementById('matrix-canvas');
+  const ctx=c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  const chars='01アイウエオカキクケコサシスセソタチツテトナニヌネノ';
+  const fs=14;let cols;let drops;
+  function init(){cols=Math.floor(c.width/fs);drops=Array(cols).fill(1)}
+  init();
+  function draw(){
+    ctx.fillStyle='rgba(10,10,10,0.05)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#00ff41';ctx.font=fs+'px JetBrains Mono';
+    drops.forEach((y,i)=>{
+      const ch=chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillText(ch,i*fs,y*fs);
+      if(y*fs>c.height&&Math.random()>0.975)drops[i]=0;
+      drops[i]++;
+    });
+  }
+  setInterval(draw,50);
+})();
+
+// ── HERO NEURAL MAP ──
+(function(){
+  const canvas=document.getElementById('neural-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,nodes=[],mouse={x:-999,y:-999};
+  let rotX=0,rotY=0,dragging=false,lastMX=0,lastMY=0;
+  
+  function resize(){
+    W=canvas.offsetWidth;H=canvas.offsetHeight;
+    canvas.width=W;canvas.height=H;
+  }
+  
+  const activities=['Certificate Verified','Student Enrolled','Exam Completed','Partner Added','Assignment Submitted','Badge Awarded','Module Unlocked'];
+  
+  function createNodes(){
+    nodes=[];
+    const n=Math.min(60,Math.floor(W*H/12000));
+    for(let i=0;i<n;i++){
+      nodes.push({
+        x:Math.random()*W,y:Math.random()*H,
+        vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,
+        r:Math.random()*3+2,
+        type:Math.random()>0.7?'blue':'green',
+        label:activities[Math.floor(Math.random()*activities.length)],
+        id:'Node '+(Math.random()*0xFFFF|0).toString(16).toUpperCase(),
+        pulse:Math.random()*Math.PI*2,active:false
+      });
+    }
+  }
+  
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // connections
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x,nodes[i].y);
+          ctx.lineTo(nodes[j].x,nodes[j].y);
+          const alpha=(1-d/120)*0.25;
+          ctx.strokeStyle=nodes[i].type==='blue'?`rgba(0,212,255,${alpha})`:`rgba(0,255,65,${alpha})`;
+          ctx.lineWidth=0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    // nodes
+    nodes.forEach(n=>{
+      n.pulse+=0.05;
+      const glow=Math.sin(n.pulse)*0.3+0.7;
+      const col=n.type==='blue'?'0,212,255':'0,255,65';
+      // pulse ring
+      if(n.active){
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r+8+Math.sin(n.pulse)*4,0,Math.PI*2);
+        ctx.strokeStyle=`rgba(${col},0.3)`;ctx.lineWidth=1;ctx.stroke();
+      }
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(${col},${glow})`;ctx.fill();
+    });
+  }
+  
+  function update(){
+    nodes.forEach(n=>{
+      n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>W)n.vx*=-1;
+      if(n.y<0||n.y>H)n.vy*=-1;
+    });
+    draw();
+    requestAnimationFrame(update);
+  }
+  
+  canvas.addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;
+    let found=false;
+    const tip=document.getElementById('node-tooltip');
+    nodes.forEach(n=>{
+      const dx=n.x-mouse.x,dy=n.y-mouse.y;
+      if(Math.sqrt(dx*dx+dy*dy)<12){
+        n.active=true;
+        tip.style.display='block';
+        tip.style.left=(n.x+15)+'px';tip.style.top=(n.y-10)+'px';
+        tip.textContent=`${n.id}: ${n.label}`;
+        found=true;
+      } else n.active=false;
+    });
+    if(!found){tip.style.display='none';}
+  });
+  canvas.addEventListener('mouseleave',()=>document.getElementById('node-tooltip').style.display='none');
+  
+  resize();createNodes();update();
+  window.addEventListener('resize',()=>{resize();createNodes();});
+})();
+
+// ── NEURAL MAP (dedicated section) ──
+(function(){
+  const canvas=document.getElementById('neural-map-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H,nodes3d=[];
+  let angleX=0.3,angleY=0,dragging=false,lastX=0,lastY=0;
+  
+  function resize(){
+    W=canvas.offsetWidth;H=canvas.offsetHeight;
+    canvas.width=W;canvas.height=H;
+  }
+  
+  function createNodes(){
+    nodes3d=[];
+    for(let i=0;i<80;i++){
+      const theta=Math.random()*Math.PI*2;
+      const phi=Math.acos(Math.random()*2-1);
+      const r=Math.random()*0.8+0.2;
+      nodes3d.push({
+        ox:Math.sin(phi)*Math.cos(theta)*r,
+        oy:Math.sin(phi)*Math.sin(theta)*r,
+        oz:Math.cos(phi)*r,
+        x:0,y:0,z:0,
+        type:Math.random()>0.6?'blue':Math.random()>0.5?'green':'gray',
+        r:Math.random()*2.5+1.5,
+        label:['Cert Verified','Enrolled','Badge','Exam Pass','Module Done'][Math.floor(Math.random()*5)],
+        id:'0x'+(Math.random()*0xFFFF|0).toString(16).toUpperCase()
+      });
+    }
+  }
+  
+  function project(ox,oy,oz){
+    const cosX=Math.cos(angleX),sinX=Math.sin(angleX);
+    const cosY=Math.cos(angleY),sinY=Math.sin(angleY);
+    const y1=oy*cosX-oz*sinX,z1=oy*sinX+oz*cosX;
+    const x2=ox*cosY+z1*sinY,z2=-ox*sinY+z1*cosY;
+    const scale=300;const px=W/2+x2*scale,py=H/2+y1*scale;
+    return{x:px,y:py,z:z2};
+  }
+  
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    nodes3d.forEach(n=>{const p=project(n.ox,n.oy,n.oz);n.x=p.x;n.y=p.y;n.z=p.z;});
+    const sorted=[...nodes3d].sort((a,b)=>a.z-b.z);
+    for(let i=0;i<sorted.length;i++){
+      for(let j=i+1;j<sorted.length;j++){
+        const dx=sorted[i].x-sorted[j].x,dy=sorted[i].y-sorted[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<80){
+          const alpha=(1-d/80)*0.2;
+          ctx.beginPath();ctx.moveTo(sorted[i].x,sorted[i].y);ctx.lineTo(sorted[j].x,sorted[j].y);
+          ctx.strokeStyle=`rgba(0,255,65,${alpha})`;ctx.lineWidth=0.5;ctx.stroke();
+        }
+      }
+    }
+    sorted.forEach(n=>{
+      const brightness=Math.max(0.3,(n.z+1)/2);
+      const col=n.type==='blue'?`rgba(0,212,255,${brightness})`:n.type==='green'?`rgba(0,255,65,${brightness})`:`rgba(100,100,100,${brightness})`;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle=col;ctx.fill();
+    });
+  }
+  
+  let animAngle=0;
+  function animate(){
+    if(!dragging){angleY+=0.003;}
+    draw();requestAnimationFrame(animate);
+  }
+  
+  canvas.addEventListener('mousedown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;});
+  canvas.addEventListener('mousemove',e=>{
+    if(dragging){
+      angleY+=(e.clientX-lastX)*0.005;
+      angleX+=(e.clientY-lastY)*0.005;
+      lastX=e.clientX;lastY=e.clientY;
+    }
+  });
+  canvas.addEventListener('mouseup',()=>dragging=false);
+  canvas.addEventListener('mouseleave',()=>dragging=false);
+  canvas.addEventListener('click',e=>{
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left,my=e.clientY-r.top;
+    nodes3d.forEach(n=>{
+      const dx=n.x-mx,dy=n.y-my;
+      if(Math.sqrt(dx*dx+dy*dy)<12){
+        updateTicker(`${n.id}: ${n.label} · just now`);
+      }
+    });
+  });
+  
+  resize();createNodes();animate();
+  window.addEventListener('resize',()=>{resize();createNodes();});
+})();
+
+// ── TICKER ──
+const tickerMsgs=['Node 4F2A: Certificate Verified','Node 7B3E: Student Enrolled','Node 2C9D: Exam Completed','Node 8A1F: Badge Awarded','Node 5E6B: Partner Verified'];
+let tIdx=0;
+function updateTicker(msg){document.getElementById('ticker-text').textContent=msg;}
+setInterval(()=>{tIdx=(tIdx+1)%tickerMsgs.length;updateTicker(tickerMsgs[tIdx]+' · '+Math.floor(Math.random()*60)+'s ago');},3000);
+
+// ── CLI SEARCH ──
+function handleCLI(e){
+  if(e.key==='Enter'){
+    const v=e.target.value.trim();
+    if(v.startsWith('/search ')){const q=v.slice(8);alert('Searching for: '+q);}
+    else if(v==='/help'){e.target.value='/search [course] | /verify [id] | /enroll [course_id]';}
+    else{e.target.value='';e.target.placeholder='Command not found. Try /help';}
+  }
+}
+
+// ── SCROLL NAV ──
+function scrollTo(sel){document.querySelector(sel)?.scrollIntoView({behavior:'smooth'});}
+
+// ── VERIFY ──
+function setVTab(el,type){
+  document.querySelectorAll('.vtab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('verify-id').placeholder='Enter '+type+' ID';
+  document.getElementById('verify-result').classList.remove('show');
+}
+
+const verifyDB={
+  'CSA-2024-0042F':{status:'valid',name:'Arjun Mehta',type:'Certified Ethical Hacker',issued:'2024-03-15',expires:'2026-03-15'},
+  'CSA-2023-0018B':{status:'expired',name:'Priya Sharma',type:'OSINT Analyst',issued:'2021-06-01',expires:'2023-06-01'},
+  'FAKE-1234-XXXX':{status:'fake',name:null,type:null},
+};
+
+function demoVerify(status){
+  const ids={valid:'CSA-2024-0042F',expired:'CSA-2023-0018B',fake:'FAKE-1234-XXXX'};
+  document.getElementById('verify-id').value=ids[status];
+  runVerify();
+}
+
+function runVerify(){
+  const id=document.getElementById('verify-id').value.trim().toUpperCase()||'FAKE-1234-XXXX';
+  const result=document.getElementById('verify-result');
+  const data=verifyDB[id]||{status:'fake'};
+  let html='';
+  if(data.status==='valid'){
+    html=`<div class="clearance-badge clearance-valid">✓ SECURITY CLEARANCE: VALID</div>
+    <div class="verify-detail">
+      <strong>Name:</strong> ${data.name}<br>
+      <strong>Certification:</strong> ${data.type}<br>
+      <strong>ID:</strong> <span style="color:var(--green)">${id}</span><br>
+      <strong>Issued:</strong> ${data.issued} &nbsp; <strong>Expires:</strong> ${data.expires}<br>
+      <strong>QR Hash:</strong> <span style="color:var(--green)">SHA256:${id.split('').reverse().join('')}A3F</span>
+    </div>`;
+  } else if(data.status==='expired'){
+    html=`<div class="clearance-badge clearance-expired">⚠ SECURITY CLEARANCE: EXPIRED</div>
+    <div class="verify-detail">
+      <strong>Name:</strong> ${data.name}<br>
+      <strong>Certification:</strong> ${data.type}<br>
+      <strong>Status:</strong> <span style="color:#ffaa00">Expired on ${data.expires}</span><br>
+      <strong>Action:</strong> Renewal required. Contact admin@cyberschool.in
+    </div>`;
+  } else {
+    html=`<div class="clearance-badge clearance-fake">✗ SECURITY CLEARANCE: INVALID / FAKE</div>
+    <div class="verify-detail" style="color:#888">
+      This ID does not match any record in our database.<br>
+      <strong style="color:#ff4444">⚠ Warning:</strong> This certificate may be fraudulent.<br>
+      Report to: fraud@cyberschool.in · +91-XXXX-XXXXXX
+    </div>`;
+  }
+  result.innerHTML=html;result.classList.add('show');
+}
+
+// ── COUNTER ANIMATION ──
+function animateCounters(){
+  document.querySelectorAll('.stat-num[data-target]').forEach(el=>{
+    const target=+el.dataset.target,duration=2000,step=16;
+    const inc=target/(duration/step);let val=0;
+    const t=setInterval(()=>{val=Math.min(val+inc,target);el.textContent=Math.floor(val).toLocaleString();if(val>=target)clearInterval(t);},step);
+  });
+}
+// Intersection observer for counters
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){animateCounters();obs.disconnect();}});
+},{threshold:0.3});
+const statsEl=document.querySelector('.stats-bar');
+if(statsEl)obs.observe(statsEl);
+</script>
+</body>
+</html>
