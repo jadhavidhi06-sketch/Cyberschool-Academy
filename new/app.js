@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  CYBERSCHOOL ACADEMY — app.js  v5.0.0
+ *  CYBERSCHOOL ACADEMY — app.js  v5.2.1
  *  Complete JS for index.html + styles.css
  *  Backend: localStorage (drop-in AWS guide at bottom)
  *  Author: CyberSchool Academy Dev Team
@@ -305,87 +305,72 @@ function addLog(msg) {
    SECTION 7 — CINEMATIC INTRO
    ============================================================ */
 
+/* =============================================================================
+   SECTION 5 — CINEMATIC ENTRY (Dual Video - FIXED)
+   ============================================================================= */
 function runIntro() {
-  const canvas = document.getElementById('intro-canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  /* Matrix rain */
-  const cols = Math.floor(canvas.width / 14);
-  const drops = Array.from({length:cols}, () => Math.random() * 50);
-  const chars = 'アイウエオカキクケコ0123456789ABCDEF<>{}[]|/\\*&%$#@!?';
-
-  function drawMatrix() {
-    ctx.fillStyle = 'rgba(0,0,0,0.055)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = '12px JetBrains Mono';
-    drops.forEach((y, i) => {
-      const c = chars[Math.floor(Math.random() * chars.length)];
-      const x = i * 14;
-      const b = Math.random();
-      ctx.fillStyle = b > .97 ? 'rgba(255,255,255,.9)' : b > .85 ? 'rgba(0,255,65,.9)' : `rgba(0,255,65,${.2+b*.4})`;
-      ctx.fillText(c, x, y * 14);
-      if (y * 14 > canvas.height && Math.random() > .95) drops[i] = 0;
-      drops[i] += 0.6;
-    });
-  }
-
-  const mi = setInterval(drawMatrix, 35);
-  document.querySelectorAll('.vault-ring').forEach(r => r.style.opacity = '1');
-
-  const steps = [
-    {p:8,  m:'INITIALIZING SECURE BOOT SEQUENCE...'},
-    {p:20, m:'LOADING ENCRYPTION MODULES [AES-256-GCM]...'},
-    {p:35, m:'ESTABLISHING NEURAL NETWORK TOPOLOGY...'},
-    {p:48, m:'VERIFYING CERTIFICATE CHAIN [CA:ROOT]...'},
-    {p:62, m:'CALIBRATING THREAT DETECTION SYSTEMS...'},
-    {p:75, m:'DECRYPTING VAULT ARCHIVE [RSA-4096]...'},
-    {p:88, m:'AUTHENTICATING BIOMETRIC SIGNATURE...'},
-    {p:96, m:'OPENING VAULT DOOR...'},
-    {p:100,m:'ACCESS GRANTED — WELCOME, AGENT ✓'},
-  ];
-
-  const prog = document.getElementById('intro-progress');
-  const status = document.getElementById('intro-status');
-  const logo = document.getElementById('intro-logo');
-  const sub = document.getElementById('intro-sub');
-  let si = 0;
-
-  function nextStep() {
-    if (si >= steps.length) {
-      clearInterval(mi);
-      logo.style.cssText = 'opacity:1;transition:opacity .6s';
-      sub.style.cssText  = 'opacity:1;transition:opacity .6s .3s';
-      const lock = document.getElementById('vault-lock');
-      lock.classList.add('visible');
-      setTimeout(completeIntro, 1800);
-      return;
-    }
-    const s = steps[si++];
-    prog.style.width = s.p + '%';
-    status.textContent = s.m;
-    setTimeout(nextStep, 380 + Math.random() * 250);
-  }
-  setTimeout(nextStep, 500);
-}
-
-function completeIntro() {
   const intro = document.getElementById('cinematic-intro');
-  intro.style.cssText = 'opacity:0;transition:opacity .9s;pointer-events:none';
-  setTimeout(() => {
-    intro.style.display = 'none';
-    document.getElementById('app').classList.add('visible');
-    document.getElementById('loading-screen').classList.add('hidden');
+  const v1 = document.getElementById('intro-v1');
+  const v2 = document.getElementById('intro-v2');
+  const brand = document.getElementById('intro-brand');
+  const flash = document.getElementById('intro-flash');
+
+  if (!intro || !v1 || !v2) {
+    console.warn("Cinematic elements missing. Skipping intro.");
+    const app = document.getElementById('app');
+    if (app) app.classList.add('visible');
     initAll();
-  }, 900);
+    return;
+  }
+
+  v1.load();
+  v2.load();
+
+  v1.play().catch(() => skipIntro());
+
+  v1.onended = () => {
+    v1.classList.remove('active');
+    v2.classList.add('active');
+    v2.play().catch(() => {});
+  };
+
+  v2.onended = () => {
+    v2.classList.remove('active');
+    if (brand) brand.classList.add('visible');
+    
+    setTimeout(() => {
+      if (flash) flash.classList.add('active');
+      setTimeout(() => {
+        intro.style.opacity = '0';
+        setTimeout(() => {
+          intro.style.display = 'none';
+          const app = document.getElementById('app');
+          if (app) app.classList.add('visible');
+          initAll();
+        }, 800);
+      }, 600);
+    }, 2200);
+  };
 }
 
 function skipIntro() {
-  document.getElementById('intro-progress').style.cssText = 'width:100%;transition:none';
-  setTimeout(completeIntro, 200);
+  const intro = document.getElementById('cinematic-intro');
+  if (intro) {
+    intro.style.transition = 'opacity 0.4s ease';
+    intro.style.opacity = '0';
+    setTimeout(() => {
+      intro.style.display = 'none';
+      const app = document.getElementById('app');
+      if (app) app.classList.add('visible');
+      initAll();
+    }, 400);
+  } else {
+    // Fallback if intro doesn't exist
+    const app = document.getElementById('app');
+    if (app) app.classList.add('visible');
+    initAll();
+  }
 }
-
 
 /* ============================================================
    SECTION 8 — MASTER INIT
@@ -415,7 +400,7 @@ function initAll() {
   renderProposalList();
   renderActivePartners();
   updateAuthUI();
-  addLog('SYSTEM: CyberSchool Academy v5.0.0 initialized');
+  addLog('SYSTEM: CyberSchool Academy v5.2.1 initialized');
 }
 
 /* ============================================================
@@ -1406,19 +1391,118 @@ function togglePass(id, btn) {
 
 
 /* ============================================================
-   SECTION 24 — MODAL HELPERS
+   SECTION 24 — MODAL HELPERS (Enhanced with Backdrop + ESC)
    ============================================================ */
 
-function openModal(id)  { const m=document.getElementById(id); if(m){m.classList.add('show');m.style.display='flex';} }
-function closeModal(id) { const m=document.getElementById(id); if(m){m.classList.remove('show');m.style.display='none';} }
+/* =============================================================================
+   SECTION 6 — MODALS (Enhanced + SAFE)
+   ============================================================================= */
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) {
+    console.warn(`Modal ${id} not found`);
+    return;
+  }
+  modal.classList.add('show');
+  modal.style.display = 'flex';
+}
 
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('modal-overlay')) closeModal(e.target.id);
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 300);
+}
+
+// Safe backdrop click handler
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay')) {
+    closeModal(e.target.id);
+  }
 });
 
+// Safe ESC key handler
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.show').forEach(modal => {
+      closeModal(modal.id);
+    });
+  }
+});
 
 /* ============================================================
-   SECTION 25 — CLI SEARCH
+   SECTION 25 — ADMIN CRUD MODALS (Course Management)
+   ============================================================ */
+
+function openCourseModal() {
+  document.getElementById('course-modal-title').textContent = 'Create New Course';
+  openModal('modal-course');
+}
+
+function editCourse(id) {
+  const c = SEED.courses.find(x => x.id === id);
+  if (c) {
+    document.getElementById('m-course-title').value = c.title;
+    document.getElementById('m-course-price').value = c.price;
+    document.getElementById('course-modal-title').textContent = `Edit Course ${id}`;
+  }
+  openModal('modal-course');
+}
+
+function deleteCourse(id) {
+  openModal('modal-delete');
+  document.getElementById('confirm-delete-btn').onclick = () => {
+    const index = SEED.courses.findIndex(x => x.id === id);
+    if (index !== -1) {
+      SEED.courses.splice(index, 1);
+      closeModal('modal-delete');
+      renderAdminPanels();
+      showToast('Course deleted permanently', 'error');
+      addLog(`COURSE DELETED: ${id}`);
+    }
+  };
+}
+
+function saveCourse() {
+  const title = document.getElementById('m-course-title').value.trim();
+  const price = document.getElementById('m-course-price').value.trim();
+  if (!title || !price) return showToast('Title and price required', 'error');
+
+  SEED.courses.push({
+    id: 'C' + Date.now(),
+    title,
+    price,
+    dept: 'ethical',
+    level: 'Intermediate',
+    desc: 'New course added by admin.',
+    duration: '3 months',
+    seats: 20,
+    maxSeats: 30,
+    tags: ['New']
+  });
+  closeModal('modal-course');
+  renderAdminPanels();
+  showToast('Course saved successfully!', 'success');
+  addLog(`COURSE CREATED: ${title}`);
+}
+
+function openTeamModal() {
+  openModal('modal-team');
+}
+
+function saveTeam() {
+  const name = document.getElementById('m-team-name')?.value.trim();
+  const role = document.getElementById('m-team-role')?.value.trim();
+  if (!name || !role) return showToast('Name and role required', 'error');
+  closeModal('modal-team');
+  showToast('Team member saved', 'success');
+}
+
+/* ============================================================
+   SECTION 26 — CLI SEARCH
    ============================================================ */
 
 function handleSearch(val) {
@@ -1448,7 +1532,7 @@ document.addEventListener('click', e => {
 
 
 /* ============================================================
-   SECTION 26 — STUDENT DASHBOARD
+   SECTION 27 — STUDENT DASHBOARD
    ============================================================ */
 
 function initStudentDashboard() {
@@ -1513,7 +1597,6 @@ function renderStudentPanels() {
           </div>`).join('')}
         </div>
       </div>`,
-
     courses: `
       <div class="dashboard-header"><div class="dashboard-title">My Courses</div></div>
       ${enrs.length ? enrs.map(e => `
@@ -1524,7 +1607,6 @@ function renderStudentPanels() {
           </div>
           <button class="course-enroll" onclick="showToast('Opening course content...','info')">CONTINUE →</button>
         </div>`).join('') : `<div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text3);padding:2rem;text-align:center">No courses enrolled. <a onclick="navigate('courses')" style="color:var(--green);cursor:none">Browse →</a></div>`}`,
-
     assignments: `
       <div class="dashboard-header"><div class="dashboard-title">Assignments</div></div>
       ${['Network Recon Lab Report','OSINT Target Profile','Forensics Case Study'].map((a,i) => `
@@ -1547,7 +1629,6 @@ function renderStudentPanels() {
           </div>
           ${i===0?'<div class="live-indicator">● LIVE</div>':`<button class="course-enroll" onclick="showToast('Class starts in ${2-i}h','info')">JOIN →</button>`}
         </div>`).join('')}`,
-
     certificates: `
       <div class="dashboard-header"><div class="dashboard-title">My Certificates</div></div>
       ${myCerts.length ? myCerts.map(c => `
@@ -1558,7 +1639,6 @@ function renderStudentPanels() {
           <div class="cert-seal">🏆</div>
           <button class="course-enroll" style="margin-top:.75rem" onclick="downloadCertText('${c.id}')">DOWNLOAD PDF</button>
         </div>`) .join('') : `<div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text3);text-align:center;padding:2rem">No certificates yet. Complete a course to earn one.</div>`}`,
-
     liveclass: `
       <div class="dashboard-header"><div class="dashboard-title">Live Classes</div></div>
       ${['Web App Pentesting — Module 8','Advanced OSINT Techniques','Red Team Operations — Lab 3','Cloud Security Architecture Review'].map((c,i)=>`
@@ -1569,7 +1649,6 @@ function renderStudentPanels() {
           </div>
           ${i===0?'<div class="live-indicator">● LIVE NOW</div>':`<span style="font-family:var(--font-mono);font-size:.6rem;color:var(--text3)">${2+i}h left</span>`}
         </div>`).join('')}`,
-
     payments: `
       <div class="dashboard-header"><div class="dashboard-title">Payment History</div></div>
       ${pays.length ? pays.map(p=>`
@@ -1577,7 +1656,6 @@ function renderStudentPanels() {
           <div><div class="payment-desc">${p.desc}</div><div class="payment-date">${p.date}</div></div>
           <div style="text-align:right"><div class="payment-amount">${p.amount}</div><div style="font-family:var(--font-mono);font-size:.6rem;color:var(--green)">${p.status}</div></div>
         </div>`).join('') : `<div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text3);text-align:center;padding:2rem">No payment records yet.</div>`}`,
-
     profile: `
       <div class="dashboard-header"><div class="dashboard-title">My Profile</div></div>
       <div style="background:var(--surface2);border:1px solid var(--border);padding:2rem;max-width:500px">
@@ -1618,7 +1696,7 @@ function updateProfile() {
 
 
 /* ============================================================
-   SECTION 27 — ADMIN DASHBOARD
+   SECTION 28 — ADMIN DASHBOARD
    ============================================================ */
 
 function initAdminDashboard() {
@@ -1672,10 +1750,9 @@ function renderAdminPanels() {
           </div>`).join('')}
         </div>
       </div>`,
-
     courses: `
       <div class="dashboard-header"><div class="dashboard-title">Manage Courses</div></div>
-      <button class="submit-btn" style="width:auto;margin-bottom:1rem" onclick="showToast('Course editor coming — add to DB','info')">+ ADD COURSE</button>
+      <button class="submit-btn" style="width:auto;margin-bottom:1rem" onclick="openCourseModal()">+ ADD COURSE</button>
       ${SEED.courses.map(c=>`
         <div style="background:var(--surface2);border:1px solid var(--border);padding:1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center">
           <div>
@@ -1683,11 +1760,10 @@ function renderAdminPanels() {
             <div style="font-family:var(--font-mono);font-size:.62rem;color:var(--text3)">${c.dept} · ${c.price} · ${c.maxSeats-c.seats} seats left</div>
           </div>
           <div style="display:flex;gap:.5rem">
-            <button class="course-enroll" onclick="showToast('Edit: ${c.title}','info')">EDIT</button>
-            <button class="course-enroll" style="border-color:var(--red);color:var(--red)" onclick="showToast('Delete course?','error')">DEL</button>
+            <button class="course-enroll" onclick="editCourse('${c.id}')">EDIT</button>
+            <button class="course-enroll" style="border-color:var(--red);color:var(--red)" onclick="deleteCourse('${c.id}')">DEL</button>
           </div>
         </div>`).join('')}`,
-
     events: `
       <div class="dashboard-header"><div class="dashboard-title">Manage Events</div></div>
       <button class="submit-btn" style="width:auto;margin-bottom:1rem" onclick="showToast('Event editor: add to SEED.events','info')">+ ADD EVENT</button>
@@ -1701,10 +1777,9 @@ function renderAdminPanels() {
             <button class="course-enroll" onclick="showToast('Edit event: ${e.title}','info')">EDIT</button>
           </div>
         </div>`).join('')}`,
-
     team: `
       <div class="dashboard-header"><div class="dashboard-title">Team Members</div></div>
-      <button class="submit-btn" style="width:auto;margin-bottom:1rem" onclick="showToast('Add team member form','info')">+ ADD MEMBER</button>
+      <button class="submit-btn" style="width:auto;margin-bottom:1rem" onclick="openTeamModal()">+ ADD MEMBER</button>
       ${SEED.team.map(t=>`
         <div style="background:var(--surface2);border:1px solid var(--border);padding:1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center">
           <div style="display:flex;align-items:center;gap:.75rem">
@@ -1719,7 +1794,6 @@ function renderAdminPanels() {
             <button class="course-enroll" style="border-color:var(--red);color:var(--red)" onclick="showToast('Remove member?','error')">DEL</button>
           </div>
         </div>`).join('')}`,
-
     partners: `
       <div class="dashboard-header"><div class="dashboard-title">Partners</div></div>
       <button class="submit-btn" style="width:auto;margin-bottom:1rem" onclick="showToast('Add partner form','info')">+ ADD PARTNER</button>
@@ -1731,7 +1805,6 @@ function renderAdminPanels() {
           </div>
           <span style="font-family:var(--font-mono);font-size:.65rem;padding:.2rem .5rem;border:1px solid;${p.status==='verified'?'border-color:var(--green);color:var(--green)':'border-color:var(--red);color:var(--red)'}">${p.status.toUpperCase()}</span>
         </div>`).join('')}`,
-
     certgen: `
       <div class="dashboard-header"><div class="dashboard-title">Certificate Generator</div></div>
       <div class="cert-generator">
@@ -1752,7 +1825,6 @@ function renderAdminPanels() {
         <button class="submit-btn" style="width:auto;padding:.6rem 2rem" onclick="generateCert()">⟶ GENERATE CERTIFICATE</button>
         <div id="cert-preview" class="cert-preview" style="display:none;margin-top:1.5rem"></div>
       </div>`,
-
     students: `
       <div class="dashboard-header"><div class="dashboard-title">Student Database (${students.length})</div></div>
       <div style="overflow-x:auto">
@@ -1763,7 +1835,7 @@ function renderAdminPanels() {
             <th style="padding:.6rem;text-align:left;color:var(--text3)">TRACK</th>
             <th style="padding:.6rem;text-align:left;color:var(--text3)">JOINED</th>
             <th style="padding:.6rem;text-align:left;color:var(--text3)">ACTION</th>
-          </tr></thead>
+           </tr></thead>
           <tbody>
             ${students.map(s=>`<tr style="border-bottom:1px solid var(--border)">
               <td style="padding:.5rem;color:var(--text1)">${s.name}</td>
@@ -1773,11 +1845,10 @@ function renderAdminPanels() {
               <td style="padding:.5rem">
                 <button onclick="showToast('View profile: ${s.name}','info')" style="font-family:var(--font-mono);font-size:.6rem;padding:.18rem .5rem;border:1px solid var(--border2);color:var(--text3);background:none;cursor:none">VIEW</button>
               </td>
-            </tr>`).join('')}
+             </tr>`).join('')}
           </tbody>
         </table>
       </div>`,
-
     proposals: `
       <div class="dashboard-header"><div class="dashboard-title">Collaboration Proposals (${proposals.length})</div></div>
       ${proposals.length ? proposals.reverse().map(p=>`
@@ -1794,7 +1865,6 @@ function renderAdminPanels() {
             </div>
           </div>
         </div>`).join('') : `<div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text3);text-align:center;padding:2rem">No proposals yet.</div>`}`,
-
     payments: `
       <div class="dashboard-header"><div class="dashboard-title">Payment Records (${payments.length})</div></div>
       ${payments.length ? payments.map(p=>`
@@ -1802,7 +1872,6 @@ function renderAdminPanels() {
           <div><div class="payment-desc">${p.desc}</div><div class="payment-date">${p.date}</div></div>
           <div style="text-align:right"><div class="payment-amount">${p.amount}</div><div style="font-family:var(--font-mono);font-size:.6rem;color:var(--green)">${p.status}</div></div>
         </div>`).join('') : `<div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text3);text-align:center;padding:2rem">No payment records.</div>`}`,
-
     inquiries: `
       <div class="dashboard-header"><div class="dashboard-title">Inquiries (${inquiries.length})</div></div>
       ${inquiries.length ? inquiries.map(i=>`
@@ -1815,7 +1884,6 @@ function renderAdminPanels() {
           <div style="font-family:var(--font-mono);font-size:.7rem;color:var(--text2);margin-top:.4rem">${i.message.slice(0,120)}...</div>
           <button class="course-enroll" style="margin-top:.6rem;font-size:.6rem" onclick="showToast('Opening reply editor for ${i.name}','info')">REPLY</button>
         </div>`).join('') : `<div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text3);text-align:center;padding:2rem">No inquiries yet.</div>`}`,
-
     analytics: `
       <div class="dashboard-header"><div class="dashboard-title">Analytics Report</div></div>
       <div class="stats-row" style="margin-bottom:2rem">
@@ -1833,14 +1901,12 @@ function renderAdminPanels() {
             <div class="analytics-value">${Math.floor(Math.random()*50+5)}</div>
           </div>`).join('')}
       </div>`,
-
     logs: `
       <div class="dashboard-header"><div class="dashboard-title">Activity Logs (${logs.length})</div></div>
       <div style="background:var(--surface2);border:1px solid var(--border);padding:1rem;font-family:var(--font-mono);font-size:.65rem;height:500px;overflow-y:auto;color:var(--green)">
         ${logs.map(l=>`<div style="border-bottom:1px solid var(--border);padding:.3rem 0">&gt; [${l.date} ${l.time}] ${l.msg}</div>`).join('')}
         ${!logs.length ? '> No logs yet.' : ''}
       </div>`,
-
     content: `
       <div class="dashboard-header"><div class="dashboard-title">Content Editor</div></div>
       ${['Hero Title','Hero Description','About Text','Contact Email','WhatsApp Number'].map(item=>`
@@ -1849,7 +1915,6 @@ function renderAdminPanels() {
           <input class="form-input" placeholder="Edit ${item}...">
           <button class="submit-btn" style="width:auto;margin-top:.5rem;padding:.4rem 1rem;font-size:.65rem" onclick="showToast('${item} updated (localStorage)','success')">SAVE</button>
         </div>`).join('')}`,
-
     notifications: `
       <div class="dashboard-header"><div class="dashboard-title">Notification Control</div></div>
       <div class="form-group" style="max-width:400px">
@@ -1978,7 +2043,7 @@ function sendBroadcast() {
 
 
 /* ============================================================
-   SECTION 28 — WINDOW INIT
+   SECTION 29 — WINDOW INIT
    ============================================================ */
 
 window.addEventListener('load', () => {
@@ -1991,6 +2056,7 @@ window.addEventListener('resize', () => {
   if (hc) { hc.width = hc.offsetWidth||window.innerWidth; hc.height = hc.offsetHeight||window.innerHeight; }
 });
 
+window.onload = runIntro;
 
 /* ============================================================
 
